@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "minetale:ruin_brick",
+    "minetale:geo_rock",
+    "minetale:snow_rock",
+    "minetale:template_marker"
+  ]
+}

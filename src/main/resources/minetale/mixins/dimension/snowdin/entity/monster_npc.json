@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "cn.jehorstudio.minetale.dimension.worldgen.region.snowdin.entity.monsternpc.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "client.SnowtownCrowdClientLevelMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

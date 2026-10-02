@@ -1,0 +1,120 @@
+{
+	"format_version": "1.12.0",
+	"minecraft:geometry": [
+		{
+			"description": {
+				"identifier": "geometry.horse_adult",
+				"texture_width": 64,
+				"texture_height": 64,
+				"visible_bounds_width": 4,
+				"visible_bounds_height": 4.5,
+				"visible_bounds_offset": [0, 1.75, 0]
+			},
+			"bones": [
+				{
+					"name": "root",
+					"pivot": [0, 0, 0]
+				},
+				{
+					"name": "torso",
+					"parent": "root",
+					"pivot": [0, 11, 0],
+					"cubes": [
+						{"origin": [-5, 17, -11], "size": [10, 10, 22], "inflate": 0.05, "pivot": [0, 22, 0], "rotation": [-90, 0, 0], "uv": [0, 32]}
+					]
+				},
+				{
+					"name": "neck",
+					"parent": "torso",
+					"pivot": [0, 31.75, -1.25],
+					"cubes": [
+						{"origin": [-2, 30.45, -6.75], "size": [4, 12, 7], "pivot": [0, 36.45, -3.25], "rotation": [20, 0, 0], "uv": [0, 35]}
+					]
+				},
+				{
+					"name": "head",
+					"parent": "neck",
+					"pivot": [0, 41.65, -4.5],
+					"cubes": [
+						{"origin": [-3, 39.65, -9], "size": [6, 5, 7], "uv": [0, 13]}
+					]
+				},
+				{
+					"name": "mouth",
+					"parent": "head",
+					"pivot": [0, 33.65, -7],
+					"cubes": [
+						{"origin": [-2, 39.65, -14], "size": [4, 5, 5], "uv": [0, 25]}
+					]
+				},
+				{
+					"name": "left_ear",
+					"parent": "head",
+					"pivot": [0, 34.65, -7.01],
+					"cubes": [
+						{"origin": [0.55, 44.65, -3.01], "size": [2, 3, 1], "uv": [19, 16]}
+					]
+				},
+				{
+					"name": "right_ear",
+					"parent": "head",
+					"pivot": [0, 34.65, -7.01],
+					"cubes": [
+						{"origin": [-2.55, 44.65, -3.01], "size": [2, 3, 1], "uv": [19, 16]}
+					]
+				},
+				{
+					"name": "left_arm",
+					"parent": "torso",
+					"pivot": [7, 33, 0],
+					"mirror": true,
+					"cubes": [
+						{"origin": [5, 22, -2], "size": [4, 11, 4], "uv": [48, 21]}
+					]
+				},
+				{
+					"name": "right_arm",
+					"parent": "torso",
+					"pivot": [-7, 33, 0],
+					"cubes": [
+						{"origin": [-9, 22, -2], "size": [4, 11, 4], "uv": [48, 21]}
+					]
+				},
+				{
+					"name": "mane",
+					"parent": "torso",
+					"pivot": [0, 31.01, 6],
+					"cubes": [
+						{"origin": [-1, 17, 4.95], "size": [2, 16, 2], "uv": [56, 36]}
+					]
+				},
+				{
+					"name": "tail",
+					"parent": "torso",
+					"pivot": [0, 18.7, 5],
+					"rotation": [-10, 0, 0],
+					"cubes": [
+						{"origin": [-1.5, 11.7, 10], "size": [3, 14, 4], "pivot": [0, 18.7, 12], "rotation": [-90, 0, 0], "uv": [42, 36]}
+					]
+				},
+				{
+					"name": "left_leg",
+					"parent": "root",
+					"pivot": [2.8, 11, 0],
+					"mirror": true,
+					"cubes": [
+						{"origin": [0.8, 0, -2], "size": [4, 11, 4], "uv": [48, 21]}
+					]
+				},
+				{
+					"name": "right_leg",
+					"parent": "root",
+					"pivot": [-2.8, 11, 0],
+					"cubes": [
+						{"origin": [-4.8, 0, -2], "size": [4, 11, 4], "uv": [48, 21]}
+					]
+				}
+			]
+		}
+	]
+}

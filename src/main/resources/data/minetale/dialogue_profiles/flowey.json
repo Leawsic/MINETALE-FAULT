@@ -1,0 +1,18 @@
+{
+  "rules": [
+    {
+      "when": [
+        {
+          "state": "minetale:met_flowey",
+          "op": "eq",
+          "value": false
+        }
+      ],
+      "run": "minetale:flowey/first_meeting"
+    },
+    {
+      "when": [],
+      "run": "minetale:flowey/debug_test_prompt"
+    }
+  ]
+}

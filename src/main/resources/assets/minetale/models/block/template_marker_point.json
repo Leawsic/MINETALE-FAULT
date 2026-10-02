@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube_directional",
+  "textures": {
+    "down": "minecraft:block/redstone_block",
+    "east": "minecraft:block/redstone_block",
+    "north": "minecraft:block/jigsaw_top",
+    "particle": "minecraft:block/redstone_block",
+    "south": "minecraft:block/redstone_block",
+    "up": "minecraft:block/redstone_block",
+    "west": "minecraft:block/redstone_block"
+  }
+}

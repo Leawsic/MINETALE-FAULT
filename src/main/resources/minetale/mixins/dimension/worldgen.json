@@ -1,0 +1,12 @@
+{
+  "minVersion": "0.8",
+  "required": true,
+  "package": "cn.jehorstudio.minetale.dimension.worldgen.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "ChunkStatusTasksMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

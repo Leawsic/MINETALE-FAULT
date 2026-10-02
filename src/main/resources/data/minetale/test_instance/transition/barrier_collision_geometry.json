@@ -1,0 +1,7 @@
+{
+  "environment": "minecraft:default",
+  "structure": "minecraft:empty",
+  "max_ticks": 1,
+  "type": "minecraft:function",
+  "function": "minetale:barrier_collision_geometry"
+}

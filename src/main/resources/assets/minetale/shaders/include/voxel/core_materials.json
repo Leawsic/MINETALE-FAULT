@@ -1,0 +1,101 @@
+{
+  "materials": [
+    {
+      "id": 0,
+      "name": "Core_Basic",
+      "function": 0,
+      "height_function": 0,
+      "expressions": 1488,
+      "visited_nodes": 500,
+      "protected_emission_noise_nodes": 0,
+      "height_expressions": 1411
+    },
+    {
+      "id": 1,
+      "name": "MainBody",
+      "function": 1,
+      "height_function": 1,
+      "expressions": 212,
+      "visited_nodes": 78,
+      "protected_emission_noise_nodes": 2,
+      "height_expressions": 167
+    },
+    {
+      "id": 2,
+      "name": "MainBody_nolights",
+      "function": 2,
+      "height_function": 1,
+      "expressions": 204,
+      "visited_nodes": 74,
+      "protected_emission_noise_nodes": 0,
+      "height_expressions": 167
+    },
+    {
+      "id": 3,
+      "name": "Tower",
+      "function": 3,
+      "height_function": 2,
+      "expressions": 1112,
+      "visited_nodes": 148,
+      "protected_emission_noise_nodes": 0,
+      "height_expressions": 1096
+    },
+    {
+      "id": 4,
+      "name": "Pillar",
+      "function": 4,
+      "height_function": 3,
+      "expressions": 29,
+      "visited_nodes": 22,
+      "protected_emission_noise_nodes": 0,
+      "height_expressions": 12
+    },
+    {
+      "id": 5,
+      "name": "Tube",
+      "function": 5,
+      "height_function": 4,
+      "expressions": 13,
+      "visited_nodes": 9,
+      "protected_emission_noise_nodes": 0,
+      "height_expressions": 4
+    },
+    {
+      "id": 6,
+      "name": "Roof",
+      "function": 0,
+      "height_function": 0,
+      "expressions": 1488,
+      "visited_nodes": 500,
+      "protected_emission_noise_nodes": 0,
+      "height_expressions": 1411
+    },
+    {
+      "id": 7,
+      "name": "Screen",
+      "function": 6,
+      "height_function": 5,
+      "expressions": 0,
+      "visited_nodes": 0,
+      "protected_emission_noise_nodes": 0,
+      "height_expressions": 0
+    }
+  ],
+  "blender": "5.2.2 LTS",
+  "source": "raw.blend",
+  "object": "core_lod",
+  "source_slots": {
+    "0": 2,
+    "1": 0,
+    "2": 3,
+    "3": 1,
+    "4": 4,
+    "5": 7,
+    "6": 5,
+    "7": 6,
+    "9": 5,
+    "10": 5,
+    "12": 2
+  },
+  "graph_sha256": "9a375f60575019fb315298174ffe71e9037279f9cab7d27a8e335fafd25b9a93"
+}

@@ -1,0 +1,23 @@
+{
+  "template": "minetale:snowtown/stubbs_medieval/0036_legacy_forest_cabin_4",
+  "role": "building",
+  "category": "minecraft:building",
+  "weight": 1,
+  "tags": [
+    "minecraft:building"
+  ],
+  "footprint": {
+    "width": 32,
+    "height": 36,
+    "depth": 30,
+    "foundation_depth": 0,
+    "max_slope": 0,
+    "allow_liquid": false,
+    "require_surface": false
+  },
+  "placement": {
+    "can_rotate": true,
+    "can_mirror": false
+  },
+  "scan_markers": true
+}

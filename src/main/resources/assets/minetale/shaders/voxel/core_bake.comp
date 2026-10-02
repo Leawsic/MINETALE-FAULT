@@ -1,0 +1,175 @@
+#version 430
+#ifndef SAMPLE_MASK
+#define SAMPLE_MASK 31
+#define SHADER_PACK 1
+#endif
+#moj_import <minetale:voxel/core_surface.glsl>
+layout(local_size_x=128) in;
+layout(std430,binding=0) readonly buffer Samples { vec4 samples[]; };
+layout(std430,binding=1) readonly buffer Texels { int texels[]; };
+layout(std430,binding=2) buffer Results { uint results[]; };
+layout(std430,binding=3) readonly buffer Declarations { vec4 declarations[]; };
+layout(rgba8,binding=0) uniform image2D colorImage;
+layout(rgba8,binding=1) uniform image2D normalImage;
+layout(rgba8,binding=2) uniform image2D specularImage;
+layout(r8,binding=3) uniform image2D emissionImage;
+layout(rgba8,binding=4) writeonly uniform image2D colorMip;
+layout(rgba8,binding=5) writeonly uniform image2D normalMip;
+layout(rgba8,binding=6) writeonly uniform image2D specularMip;
+layout(r8,binding=7) writeonly uniform image2D emissionMip;
+uniform int mip;
+uniform float textureStep;
+uniform int sampleCount;
+uniform bool prebakedInput;
+uniform uint firstIndex;
+uniform uint endIndex;
+uniform int tileSize;
+uniform ivec2 tileOrigin;
+uniform ivec4 channelSizes;
+uniform ivec4 channelOffsets;
+uniform ivec4 outputSizes;
+uniform bool reuseColor;
+uniform sampler2D previousColor;
+uniform sampler2D previousEmission;
+uniform ivec2 previousOrigin;
+vec3 srgb(vec3 c) {return mix(12.92*c,1.055*pow(max(c,vec3(0)),vec3(1.0/2.4))-.055,step(vec3(.0031308),c));}
+vec3 linearColor(vec3 c) {return mix(c/12.92,pow((c+.055)/1.055,vec3(2.4)),step(vec3(.04045),c));}
+vec3 decodeNormal(vec2 xy) {xy=xy*2.0-1.0;return vec3(xy,sqrt(max(0.0,1.0-dot(xy,xy))));}
+uvec4 sampleValue(int channel,ivec2 pixel,int outputSize) {
+    if(channelOffsets[channel]<0)channel=0;
+    pixel=pixel*channelSizes[channel]/outputSize;
+    int id=texels[channelOffsets[channel]+pixel.y*channelSizes[channel]+pixel.x];
+    if(id<0)return uvec4(0,packUnorm4x8(vec4(.5,.5,1,1)),packUnorm4x8(vec4(0,.04,0,0)),0);
+#if SHADER_PACK
+    return uvec4(results[id*5],results[id*5+1],results[id*5+2],results[id*5+3]);
+#else
+    return uvec4(results[id*2],0,results[id*2+1],0);
+#endif
+}
+float emissionOf(uvec4 value) {
+#if SHADER_PACK
+    return float(value.w&255u)/255.0;
+#else
+    return float(value.z&255u)/255.0;
+#endif
+}
+float normalVariance(ivec2 pixel,int outputSize) {
+#if SHADER_PACK
+    int channel=channelOffsets.y<0?0:1;
+    pixel=pixel*channelSizes[channel]/outputSize;
+    int id=texels[channelOffsets[channel]+pixel.y*channelSizes[channel]+pixel.x];
+    return id<0?0.0:uintBitsToFloat(results[id*5+4]);
+#else
+    return 0.0;
+#endif
+}
+void storeResult(uint index,uint color,uint normal,uint specular,uint emission,float variance) {
+#if SHADER_PACK
+    results[index*5u]=color;results[index*5u+1u]=normal;results[index*5u+2u]=specular;results[index*5u+3u]=emission;results[index*5u+4u]=floatBitsToUint(variance);
+#else
+    results[index*2u]=color;results[index*2u+1u]=emission;
+#endif
+}
+void main() {
+    uint index=firstIndex+gl_GlobalInvocationID.x;
+    int size=mip==2?tileSize/2:tileSize;
+    if(index>=endIndex||index>=uint(mip==0?sampleCount:size*size))return;
+    ivec2 local=ivec2(int(index)%size,int(index)/size);
+    if(mip==2) {
+        for(int channel=0;channel<4;channel++) {
+            if(any(greaterThanEqual(local,ivec2(outputSizes[channel]/2))))continue;
+            ivec2 pixel=local+tileOrigin*outputSizes[channel]/tileSize/2;
+            vec4 value=vec4(0),metals=vec4(0);vec3 n=vec3(0);float ao=0;
+            for(int y=0;y<2;y++)for(int x=0;x<2;x++) {
+                ivec2 p=pixel*2+ivec2(x,y);
+                if(channel==0){vec4 c=imageLoad(colorImage,p);value+=vec4(linearColor(c.rgb),c.a)*.25;}
+                else if(channel==1){vec4 v=imageLoad(normalImage,p);n+=decodeNormal(v.rg);ao+=v.b*.25;}
+                else if(channel==2){
+                    vec4 v=imageLoad(specularImage,p);value.r+=(1.0-v.r)*(1.0-v.r)*.25;metals[y*2+x]=v.g;value.a+=v.a*.25;
+                    if(outputSizes.y>0)n+=decodeNormal(imageLoad(normalImage,p*outputSizes.y/outputSizes.z).rg)*.25;
+                }
+                else value.r+=imageLoad(emissionImage,p).r*.25;
+            }
+            if(channel==0)imageStore(colorMip,pixel,vec4(srgb(value.rgb),value.a));
+            else if(channel==1){n=dot(n,n)>0?normalize(n):vec3(0,0,1);imageStore(normalMip,pixel,vec4(n.xy*.5+.5,ao,1));}
+            else if(channel==2){
+                float lengthMean=outputSizes.y>0?length(n):1.0;
+                float variance=clamp((1.0-lengthMean)/max(lengthMean,1e-4),0.0,1.0);
+                value.r=1.0-sqrt(clamp(value.r+variance,0.0,1.0));
+                // 金属类别按覆盖数选择；平票使用固定纹素顺序。
+                int best=0,most=0;
+                for(int i=0;i<4;i++){int count=0;for(int j=0;j<4;j++)if((metals[i]>=230.0/255.0)==(metals[j]>=230.0/255.0))count++;if(count>most){best=i;most=count;}}
+                value.g=metals[best];imageStore(specularMip,pixel,value);
+            } else imageStore(emissionMip,pixel,value);
+        }
+        return;
+    }
+    if(mip==1) {
+        for(int channel=0;channel<4;channel++) {
+            if(any(greaterThanEqual(local,ivec2(outputSizes[channel]))))continue;
+            ivec2 pixel=local+tileOrigin*outputSizes[channel]/tileSize;
+            if(channel==0)imageStore(colorImage,pixel,unpackUnorm4x8(sampleValue(0,local,outputSizes.x).x));
+            else if(channel==1)imageStore(normalImage,pixel,unpackUnorm4x8(sampleValue(1,local,outputSizes.y).y));
+            else if(channel==2){
+                vec4 spec=unpackUnorm4x8(sampleValue(2,local,outputSizes.z).z);
+                spec.g=unpackUnorm4x8(sampleValue(3,local,outputSizes.z).z).g;
+                spec.a=emissionOf(sampleValue(0,local,outputSizes.z))*(254.0/255.0);
+                float variance=normalVariance(local,outputSizes.z);
+                spec.r=1.0-sqrt(clamp((1.0-spec.r)*(1.0-spec.r)+variance,0.0,1.0));
+                imageStore(specularImage,pixel,spec);
+            }else imageStore(emissionImage,pixel,vec4(emissionOf(sampleValue(0,local,outputSizes.w)),0,0,1));
+        }
+        return;
+    }
+    vec4 a=samples[index*3u],b=samples[index*3u+1u],c=samples[index*3u+2u];
+    int sourcePixel=floatBitsToInt(c.w);
+    bool copyColor=reuseColor&&sourcePixel>=0;
+    uint copiedColor=0u,copiedEmission=0u;
+    if(copyColor){
+        ivec2 pixel=ivec2(sourcePixel&65535,sourcePixel>>16)+previousOrigin;
+        copiedColor=packUnorm4x8(texelFetch(previousColor,pixel,0));
+        copiedEmission=uint(round(texelFetch(previousEmission,pixel,0).r*255.0));
+    }
+    if(prebakedInput){storeResult(index,copyColor?copiedColor:floatBitsToUint(a.x),floatBitsToUint(a.y),floatBitsToUint(a.z),copyColor?copiedEmission:floatBitsToUint(a.w),c.z);return;}
+    int material=int(b.w),declaration=int(c.y)*3;
+    vec4 constantNormal=declarations[declaration],constantSurface=declarations[declaration+1];
+    vec3 constantEmission=vec3(constantSurface.zw,declarations[declaration+2].x);
+    vec3 normal=normalize(vec3(a.w,b.xy));
+    vec3 tangent=normalize(abs(normal.y)<.9?vec3(normal.z,0,-normal.x):vec3(0,-normal.z,normal.y));
+    vec3 bitangent=cross(tangent,normal);
+    vec3 n=coreToMaterialSpace(normal),t=coreToMaterialSpace(tangent),v=coreToMaterialSpace(bitangent);
+    vec3 albedo=vec3(0);float alpha=0,roughness=0,metalCoverage=0,intensity=0;
+    // 世界采样格确定覆盖范围；子格排列不随相机移动改变。
+    for(int tap=0;tap<4;tap++) {
+        vec2 offset=(vec2(tap&1,tap>>1)-.5)*.5*c.x;
+        vec3 p=coreToMaterialSpace(a.xyz)+t*offset.x+v*offset.y;
+        CoreMaterial m=coreMaterial(material,p,p,n);
+        vec3 emission=constantEmission;
+#if (SAMPLE_MASK & 16) != 0
+        emission=max(vec3(0),m.emissionColor*m.emissionStrength);
+#endif
+#if (SAMPLE_MASK & 1) != 0
+        albedo+=clamp(max(m.color,emission),0.0,1.0)*.25;alpha+=m.alpha*.25;
+#endif
+        intensity+=clamp(max(emission.r,max(emission.g,emission.b)),0.0,1.0)*.25;
+        float r=constantSurface.x,metal=constantSurface.y;
+#if (SAMPLE_MASK & 4) != 0
+        r=m.roughness;
+#endif
+#if (SAMPLE_MASK & 8) != 0
+        metal=m.metallic;
+#endif
+        roughness+=clamp(r,0.0,1.0)*.25;metalCoverage+=(metal>=.5?1.0:0.0)*.25;
+    }
+    vec3 filteredNormal=constantNormal.xyz;
+#if (SAMPLE_MASK & 2) != 0
+    // 基础级法线在采样中心计算一次；缩小过滤与方差补偿由 mip 阶段承担。
+    vec3 p=coreToMaterialSpace(a.xyz);
+    CoreMaterial m=coreMaterial(material,p,p,n);
+    vec3 right=p+t*textureStep,up=p+v*textureStep;
+    vec2 heights=vec2(coreHeight(material,right,right,n).x,coreHeight(material,up,up,n).x);
+    vec3 finalNormal=coreBumpFromNeighbors(m,n,t,v,heights,vec2(textureStep));
+    filteredNormal=vec3(dot(finalNormal,t),dot(finalNormal,v),dot(finalNormal,n));
+#endif
+    storeResult(index,copyColor?copiedColor:packUnorm4x8(vec4(srgb(albedo),alpha)),packUnorm4x8(vec4(filteredNormal.xy*.5+.5,1,1)),packUnorm4x8(vec4(1.0-roughness,metalCoverage>=.5?1.0:.04,0,0)),copyColor?copiedEmission:uint(round(intensity*255.0)),0.0);
+}

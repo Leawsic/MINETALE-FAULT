@@ -1,0 +1,81 @@
+{
+	"format_version": "1.12.0",
+	"minecraft:geometry": [
+		{
+			"description": {
+				"identifier": "geometry.cat_baby",
+				"texture_width": 32,
+				"texture_height": 32,
+				"visible_bounds_width": 2,
+				"visible_bounds_height": 2.5,
+				"visible_bounds_offset": [0, 0.75, 0]
+			},
+			"bones": [
+				{
+					"name": "root",
+					"pivot": [0, 0, 0]
+				},
+				{
+					"name": "torso",
+					"parent": "root",
+					"pivot": [0, 3, 0],
+					"cubes": [
+						{"origin": [-2, 5, -3.5], "size": [4, 3, 7], "pivot": [0, 6.5, 0], "rotation": [-90, 0, 0], "uv": [0, 8]}
+					]
+				},
+				{
+					"name": "head",
+					"parent": "torso",
+					"pivot": [0, 9, -1.05],
+					"cubes": [
+						{"origin": [-2.5, 9, -2.55], "size": [5, 4, 4], "uv": [0, 0]},
+						{"origin": [1, 13.5, -1], "size": [1, 1, 2], "pivot": [1.5, 14, 0], "rotation": [-90, 0, 0], "uv": [18, 0]},
+						{"origin": [-2, 13.5, -1], "size": [1, 1, 2], "pivot": [-1.5, 14, 0], "rotation": [-90, 0, 0], "uv": [24, 0]},
+						{"origin": [-1.5, 9, -3.55], "size": [3, 2, 1], "uv": [18, 3]}
+					]
+				},
+				{
+					"name": "left_arm",
+					"parent": "torso",
+					"pivot": [2.5, 10, 0],
+					"cubes": [
+						{"origin": [2, 8, -1], "size": [1, 2, 2], "uv": [18, 18]}
+					]
+				},
+				{
+					"name": "right_arm",
+					"parent": "torso",
+					"pivot": [-2.5, 10, 0],
+					"cubes": [
+						{"origin": [-3, 8, -1], "size": [1, 2, 2], "uv": [12, 18]}
+					]
+				},
+				{
+					"name": "tail",
+					"parent": "torso",
+					"pivot": [0, 5.45, 1.5],
+					"rotation": [-10, 0, 0],
+					"cubes": [
+						{"origin": [-0.5, 4.95, 1.5], "size": [1, 1, 5], "uv": [0, 18]}
+					]
+				},
+				{
+					"name": "left_leg",
+					"parent": "root",
+					"pivot": [1.12, 3, 0],
+					"cubes": [
+						{"origin": [0.62, 0, -1], "size": [1, 2, 2], "uv": [18, 22]}
+					]
+				},
+				{
+					"name": "right_leg",
+					"parent": "root",
+					"pivot": [-1.12, 3, 0],
+					"cubes": [
+						{"origin": [-1.62, 0, -1], "size": [1, 2, 2], "uv": [12, 22]}
+					]
+				}
+			]
+		}
+	]
+}

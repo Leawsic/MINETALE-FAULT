@@ -1,0 +1,2583 @@
+{
+  "schemaVersion": 1,
+  "id": "minetale:debug/lighting_cycle_test",
+  "metadata": {
+    "displayName": "Battle Renderer V2 Lighting Cycle Test",
+    "description": "复用 default 的 3D 战斗布局，仅保留一个无限自循环的敌方阶段。按固定周期依次释放轴向基准、平行扫掠、前后深度幕、上下对冲、挤出图片、反弹与混合遮挡弹幕，用于观察 Rendered 模式的全局光照、材质明暗、投影方向、阴影叠加和动态稳定性。"
+  },
+  "variables": {
+    "cycle_index": {
+      "type": "int",
+      "initial": 0
+    },
+    "cycle_mode": {
+      "type": "int",
+      "initial": 0
+    }
+  },
+  "imports": {
+    "actorPrefabs": [],
+    "rulesets": [],
+    "patterns": [],
+    "outcomes": []
+  },
+  "events": {},
+  "actors": {
+    "battle_frame": {
+      "type": "scripted_actor",
+      "kind": "minetale:frame",
+      "role": "hybrid",
+      "transform": {
+        "space": "battle.canonical",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotationDeg": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1.15,
+          1.15,
+          1
+        ]
+      },
+      "visual": {
+        "type": "frame",
+        "mode": "dual",
+        "visible": true,
+        "rendered": {"enabled":true,"castsShadow":false,"receivesShadow":true},
+        "frame": {
+          "worldSize": [
+            2,
+            2,
+            2
+          ],
+          "thickness": 0.045,
+          "borderColor": "#FFFFFFFF"
+        }
+      },
+      "collision": {
+        "shape": "box",
+        "space": "battle.canonical",
+        "halfSize": [
+          1,
+          1,
+          1
+        ]
+      },
+      "tags": [
+        "battle_frame",
+        "primary_frame",
+        "active_arena"
+      ],
+      "vars": {},
+      "components": [],
+      "events": {}
+    },
+    "enemy_flowey": {
+      "type": "scripted_actor",
+      "kind": "minetale:image",
+      "role": "presentation",
+      "visual": {
+        "type": "image",
+        "mode": "3d",
+        "visible": true,
+        "rendered": {"enabled":true,"castsShadow":false,"receivesShadow":false},
+        "image": {
+          "texture": "minetale:textures/gui/battle/character/flowey.png",
+          "source": [
+            0,
+            0,
+            45,
+            47
+          ],
+          "textureSize": [
+            45,
+            47
+          ],
+          "thickness": 0.05,
+          "tint": "#FFFFFFFF",
+          "fit": "contain",
+          "aspect": "source"
+        }
+      },
+      "collision": {
+        "shape": "none"
+      },
+      "tags": [
+        "enemy",
+        "battle_ui",
+        "character",
+        "world_plane",
+        "character_plane"
+      ],
+      "vars": {},
+      "components": [],
+      "events": {},
+      "transform": {
+        "space": "battle.canonical",
+        "position": [
+          0,
+          0.02,
+          -1.875
+        ],
+        "rotationDeg": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          3.4,
+          1,
+          3.4
+        ]
+      }
+    },
+    "turn_banner": {
+      "type": "scripted_actor",
+      "kind": "minetale:text",
+      "role": "presentation",
+      "transform": {
+        "space": "battle.canonical",
+        "position": [
+          -3.444,
+          0,
+          -3.219
+        ]
+      },
+      "visual": {
+        "type": "text",
+        "mode": "3d",
+        "visible": true,
+        "rendered": {"enabled":false,"castsShadow":false,"receivesShadow":false},
+        "text": {
+          "value": "LIGHT 1/7 AXIS",
+          "color": "#FFFFFFFF",
+          "shadow": false,
+          "align": "left",
+          "verticalAlign": "top",
+          "fit": "clip",
+          "fontScale": {
+            "type": "fixed",
+            "value": 2.2
+          },
+          "worldSize": [
+            3.556,
+            0.3125
+          ]
+        }
+      },
+      "collision": {
+        "shape": "none"
+      },
+      "tags": [
+        "ui",
+        "debug",
+        "phase_banner"
+      ],
+      "vars": {},
+      "components": [],
+      "events": {}
+    },
+    "message_text": {
+      "type": "scripted_actor",
+      "kind": "minetale:text",
+      "role": "presentation",
+      "transform": {
+        "space": "battle.canonical",
+        "position": [
+          0,
+          0,
+          0.5
+        ]
+      },
+      "visual": {
+        "type": "text",
+        "mode": "3d",
+        "visible": true,
+        "rendered": {"enabled":false,"castsShadow":false,"receivesShadow":false},
+        "text": {
+          "value": "",
+          "color": "#FFFFFFFF",
+          "shadow": false,
+          "align": "left",
+          "verticalAlign": "top",
+          "fit": "wrap",
+          "fontScale": {
+            "type": "fixed",
+            "value": 2.5
+          },
+          "worldSize": [
+            7.111,
+            1.25
+          ]
+        }
+      },
+      "collision": {
+        "shape": "none"
+      },
+      "tags": [
+        "ui",
+        "dialogue",
+        "text"
+      ],
+      "vars": {},
+      "components": [],
+      "events": {}
+    },
+    "player_name": {
+      "type": "scripted_actor",
+      "kind": "minetale:text",
+      "role": "presentation",
+      "transform": {
+        "space": "battle.canonical",
+        "position": [
+          -2.944,
+          0,
+          1.844
+        ]
+      },
+      "visual": {
+        "type": "text",
+        "mode": "3d",
+        "visible": true,
+        "rendered": {"enabled":false,"castsShadow":false,"receivesShadow":false},
+        "text": {
+          "value": "LLBLD",
+          "color": "#FFFFFFFF",
+          "shadow": false,
+          "align": "left",
+          "verticalAlign": "top",
+          "fit": "clip",
+          "fontScale": {
+            "type": "fixed",
+            "value": 3.2
+          },
+          "worldSize": [
+            1.222,
+            0.3125
+          ]
+        }
+      },
+      "collision": {
+        "shape": "none"
+      },
+      "tags": [
+        "ui",
+        "text"
+      ],
+      "vars": {},
+      "components": [],
+      "events": {}
+    },
+    "player_lv": {
+      "type": "scripted_actor",
+      "kind": "minetale:text",
+      "role": "presentation",
+      "transform": {
+        "space": "battle.canonical",
+        "position": [
+          -1.611,
+          0,
+          1.844
+        ]
+      },
+      "visual": {
+        "type": "text",
+        "mode": "3d",
+        "visible": true,
+        "rendered": {"enabled":false,"castsShadow":false,"receivesShadow":false},
+        "text": {
+          "value": "LV 1",
+          "color": "#FFFFFFFF",
+          "shadow": false,
+          "align": "left",
+          "verticalAlign": "top",
+          "fit": "clip",
+          "fontScale": {
+            "type": "fixed",
+            "value": 3.2
+          },
+          "worldSize": [
+            1,
+            0.3125
+          ]
+        }
+      },
+      "collision": {
+        "shape": "none"
+      },
+      "tags": [
+        "ui",
+        "text"
+      ],
+      "vars": {},
+      "components": [],
+      "events": {}
+    },
+    "player_hp_label": {
+      "type": "scripted_actor",
+      "kind": "minetale:text",
+      "role": "presentation",
+      "transform": {
+        "space": "battle.canonical",
+        "position": [
+          -0.111,
+          0,
+          1.844
+        ]
+      },
+      "visual": {
+        "type": "text",
+        "mode": "3d",
+        "visible": true,
+        "rendered": {"enabled":false,"castsShadow":false,"receivesShadow":false},
+        "text": {
+          "value": "HP",
+          "color": "#FFFFFFFF",
+          "shadow": false,
+          "align": "left",
+          "verticalAlign": "top",
+          "fit": "clip",
+          "fontScale": {
+            "type": "fixed",
+            "value": 3.2
+          },
+          "worldSize": [
+            0.667,
+            0.3125
+          ]
+        }
+      },
+      "collision": {
+        "shape": "none"
+      },
+      "tags": [
+        "ui",
+        "text"
+      ],
+      "vars": {},
+      "components": [],
+      "events": {}
+    },
+    "player_hp_bar": {
+      "type": "scripted_actor",
+      "kind": "minetale:progress",
+      "role": "presentation",
+      "transform": {
+        "space": "battle.canonical",
+        "position": [
+          0.778,
+          0,
+          1.8125
+        ]
+      },
+      "visual": {
+        "type": "progress_bar",
+        "mode": "3d",
+        "visible": true,
+        "rendered": {"enabled":false,"castsShadow":false,"receivesShadow":false},
+        "progress": {
+          "min": 0,
+          "max": 1,
+          "value": 1,
+          "fillColor": "#FFFFD000",
+          "backgroundColor": "#FF500000",
+          "borderColor": "#00FFFFFF",
+          "borderWidth": 0,
+          "worldSize": [
+            1.333,
+            0.25
+          ],
+          "thickness": 0.05
+        }
+      },
+      "collision": {
+        "shape": "none"
+      },
+      "tags": [
+        "ui",
+        "hud",
+        "hp"
+      ],
+      "vars": {},
+      "components": [],
+      "events": {}
+    },
+    "player_hp_text": {
+      "type": "scripted_actor",
+      "kind": "minetale:text",
+      "role": "presentation",
+      "transform": {
+        "space": "battle.canonical",
+        "position": [
+          2.222,
+          0,
+          1.844
+        ]
+      },
+      "visual": {
+        "type": "text",
+        "mode": "3d",
+        "visible": true,
+        "rendered": {"enabled":false,"castsShadow":false,"receivesShadow":false},
+        "text": {
+          "value": "20 / 20",
+          "color": "#FFFFFFFF",
+          "shadow": false,
+          "align": "left",
+          "verticalAlign": "top",
+          "fit": "clip",
+          "fontScale": {
+            "type": "fixed",
+            "value": 3.2
+          },
+          "worldSize": [
+            1.333,
+            0.3125
+          ]
+        }
+      },
+      "collision": {
+        "shape": "none"
+      },
+      "tags": [
+        "ui",
+        "text"
+      ],
+      "vars": {},
+      "components": [],
+      "events": {}
+    },
+    "option_fight": {
+      "type": "scripted_actor",
+      "kind": "minetale:image",
+      "role": "presentation",
+      "visual": {
+        "type": "image",
+        "mode": "3d",
+        "visible": true,
+        "rendered": {"enabled":true,"castsShadow":true,"receivesShadow":true},
+        "image": {
+          "texture": "minetale:textures/gui/battle/zh_cn/fight_decision_un.png",
+          "source": [
+            0,
+            0,
+            114,
+            46
+          ],
+          "textureSize": [
+            114,
+            46
+          ],
+          "thickness": 0.05,
+          "tint": "#FFFFFFFF",
+          "fit": "contain",
+          "aspect": "source"
+        }
+      },
+      "collision": {
+        "shape": "none"
+      },
+      "tags": [
+        "command_option",
+        "command_fight",
+        "ui",
+        "world_plane",
+        "command_plane"
+      ],
+      "vars": {},
+      "components": [],
+      "events": {},
+      "transform": {
+        "space": "battle.canonical",
+        "position": [
+          -3.5,
+          0.02,
+          2.375
+        ],
+        "rotationDeg": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          0.87,
+          1,
+          0.87
+        ]
+      }
+    },
+    "option_act": {
+      "type": "scripted_actor",
+      "kind": "minetale:image",
+      "role": "presentation",
+      "visual": {
+        "type": "image",
+        "mode": "3d",
+        "visible": true,
+        "rendered": {"enabled":true,"castsShadow":true,"receivesShadow":true},
+        "image": {
+          "texture": "minetale:textures/gui/battle/zh_cn/action_decision_un.png",
+          "source": [
+            0,
+            0,
+            114,
+            46
+          ],
+          "textureSize": [
+            114,
+            46
+          ],
+          "thickness": 0.05,
+          "tint": "#FFFFFFFF",
+          "fit": "contain",
+          "aspect": "source"
+        }
+      },
+      "collision": {
+        "shape": "none"
+      },
+      "tags": [
+        "command_option",
+        "command_act",
+        "ui",
+        "world_plane",
+        "command_plane"
+      ],
+      "vars": {},
+      "components": [],
+      "events": {},
+      "transform": {
+        "space": "battle.canonical",
+        "position": [
+          -1.167,
+          0.02,
+          2.375
+        ],
+        "rotationDeg": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          0.87,
+          1,
+          0.87
+        ]
+      }
+    },
+    "option_item": {
+      "type": "scripted_actor",
+      "kind": "minetale:image",
+      "role": "presentation",
+      "visual": {
+        "type": "image",
+        "mode": "3d",
+        "visible": true,
+        "rendered": {"enabled":true,"castsShadow":true,"receivesShadow":true},
+        "image": {
+          "texture": "minetale:textures/gui/battle/zh_cn/item_decision_un.png",
+          "source": [
+            0,
+            0,
+            114,
+            46
+          ],
+          "textureSize": [
+            114,
+            46
+          ],
+          "thickness": 0.05,
+          "tint": "#FFFFFFFF",
+          "fit": "contain",
+          "aspect": "source"
+        }
+      },
+      "collision": {
+        "shape": "none"
+      },
+      "tags": [
+        "command_option",
+        "command_item",
+        "ui",
+        "world_plane",
+        "command_plane"
+      ],
+      "vars": {},
+      "components": [],
+      "events": {},
+      "transform": {
+        "space": "battle.canonical",
+        "position": [
+          1.167,
+          0.02,
+          2.375
+        ],
+        "rotationDeg": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          0.87,
+          1,
+          0.87
+        ]
+      }
+    },
+    "option_mercy": {
+      "type": "scripted_actor",
+      "kind": "minetale:image",
+      "role": "presentation",
+      "visual": {
+        "type": "image",
+        "mode": "3d",
+        "visible": true,
+        "rendered": {"enabled":true,"castsShadow":true,"receivesShadow":true},
+        "image": {
+          "texture": "minetale:textures/gui/battle/zh_cn/mercy_decision_un.png",
+          "source": [
+            0,
+            0,
+            114,
+            46
+          ],
+          "textureSize": [
+            114,
+            46
+          ],
+          "thickness": 0.05,
+          "tint": "#FFFFFFFF",
+          "fit": "contain",
+          "aspect": "source"
+        }
+      },
+      "collision": {
+        "shape": "none"
+      },
+      "tags": [
+        "command_option",
+        "command_mercy",
+        "ui",
+        "world_plane",
+        "command_plane"
+      ],
+      "vars": {},
+      "components": [],
+      "events": {},
+      "transform": {
+        "space": "battle.canonical",
+        "position": [
+          3.5,
+          0.02,
+          2.375
+        ],
+        "rotationDeg": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          0.87,
+          1,
+          0.87
+        ]
+      }
+    },
+    "probe_model_static": {
+      "type": "scripted_actor",
+      "kind": "minetale:lighting_probe_model_static",
+      "role": "gameplay",
+      "transform": {
+        "space": "battle.canonical",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotationDeg": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "visual": {
+        "type": "image_model",
+        "mode": "dual",
+        "visible": true,
+        "rendered": {"enabled":true,"castsShadow":true,"receivesShadow":true},
+        "image": {
+          "texture": "minetale:textures/gui/battle/bullet1.png",
+          "source": [
+            0,
+            0,
+            7,
+            7
+          ],
+          "textureSize": [
+            7,
+            7
+          ],
+          "tint": "#FFFFFFFF",
+          "fit": "contain",
+          "aspect": "source"
+        },
+        "model": {
+          "id": "bullet1",
+          "tint": "#FFFFFFFF",
+          "scale": [
+            0.125,
+            0.125,
+            0.125
+          ]
+        }
+      },
+      "collision": {
+        "shape": "box",
+        "space": "battle.canonical",
+        "halfSize": [
+          0.06,
+          0.06,
+          0.06
+        ]
+      },
+      "collisionPolicy": {
+        "type": "volume_3d"
+      },
+      "tags": [
+        "attack",
+        "lighting_probe",
+        "model_probe"
+      ],
+      "vars": {},
+      "components": [
+        {
+          "type": "lifetime",
+          "seconds": 7
+        }
+      ],
+      "events": {}
+    },
+    "probe_model_moving": {
+      "type": "scripted_actor",
+      "kind": "minetale:lighting_probe_model_moving",
+      "role": "gameplay",
+      "transform": {
+        "space": "battle.canonical",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotationDeg": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          0.9,
+          0.9,
+          0.9
+        ]
+      },
+      "visual": {
+        "type": "image_model",
+        "mode": "dual",
+        "visible": true,
+        "rendered": {"enabled":true,"castsShadow":true,"receivesShadow":true},
+        "image": {
+          "texture": "minetale:textures/gui/battle/bullet1.png",
+          "source": [
+            0,
+            0,
+            7,
+            7
+          ],
+          "textureSize": [
+            7,
+            7
+          ],
+          "tint": "#FFFFFFFF",
+          "fit": "contain",
+          "aspect": "source"
+        },
+        "model": {
+          "id": "bullet1",
+          "tint": "#FFFFFFFF",
+          "scale": [
+            0.125,
+            0.125,
+            0.125
+          ]
+        }
+      },
+      "collision": {
+        "shape": "box",
+        "space": "battle.canonical",
+        "halfSize": [
+          0.055,
+          0.055,
+          0.055
+        ]
+      },
+      "collisionPolicy": {
+        "type": "volume_3d"
+      },
+      "tags": [
+        "attack",
+        "lighting_probe",
+        "model_probe",
+        "moving"
+      ],
+      "vars": {},
+      "components": [
+        {
+          "type": "velocity_movement"
+        },
+        {
+          "type": "spin",
+          "degreesPerSecond": 180
+        },
+        {
+          "type": "lifetime",
+          "seconds": 8
+        }
+      ],
+      "events": {}
+    },
+    "probe_model_bounce": {
+      "type": "scripted_actor",
+      "kind": "minetale:lighting_probe_model_bounce",
+      "role": "gameplay",
+      "transform": {
+        "space": "battle.canonical",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotationDeg": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          0.95,
+          0.95,
+          0.95
+        ]
+      },
+      "visual": {
+        "type": "image_model",
+        "mode": "dual",
+        "visible": true,
+        "rendered": {"enabled":true,"castsShadow":true,"receivesShadow":true},
+        "image": {
+          "texture": "minetale:textures/gui/battle/bullet1.png",
+          "source": [
+            0,
+            0,
+            7,
+            7
+          ],
+          "textureSize": [
+            7,
+            7
+          ],
+          "tint": "#FFFFFFFF",
+          "fit": "contain",
+          "aspect": "source"
+        },
+        "model": {
+          "id": "bullet1",
+          "tint": "#FFFFFFFF",
+          "scale": [
+            0.125,
+            0.125,
+            0.125
+          ]
+        }
+      },
+      "collision": {
+        "shape": "box",
+        "space": "battle.canonical",
+        "halfSize": [
+          0.06,
+          0.06,
+          0.06
+        ]
+      },
+      "collisionPolicy": {
+        "type": "volume_3d"
+      },
+      "tags": [
+        "attack",
+        "lighting_probe",
+        "model_probe",
+        "bouncing"
+      ],
+      "vars": {},
+      "components": [
+        {
+          "type": "velocity_movement"
+        },
+        {
+          "type": "bounce_on_battle_box",
+          "remainingRebounds": 24,
+          "onSpent": "destroy"
+        },
+        {
+          "type": "spin",
+          "degreesPerSecond": 300
+        },
+        {
+          "type": "lifetime",
+          "seconds": 9
+        }
+      ],
+      "events": {}
+    },
+    "probe_extruded_thin": {
+      "type": "scripted_actor",
+      "kind": "minetale:lighting_probe_extruded_thin",
+      "role": "gameplay",
+      "transform": {
+        "space": "battle.canonical",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotationDeg": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1.35,
+          1.35,
+          1.35
+        ]
+      },
+      "visual": {
+        "type": "image",
+        "mode": "3d",
+        "visible": true,
+        "rendered": {"enabled":true,"castsShadow":true,"receivesShadow":true},
+        "image": {
+          "texture": "minetale:textures/gui/battle/bullet1.png",
+          "source": [
+            0,
+            0,
+            7,
+            7
+          ],
+          "textureSize": [
+            7,
+            7
+          ],
+          "tint": "#FFFFFFFF",
+          "fit": "contain",
+          "aspect": "source",
+          "thickness": 0.06
+        }
+      },
+      "collision": {
+        "shape": "box",
+        "space": "battle.canonical",
+        "halfSize": [
+          0.06,
+          0.06,
+          0.04
+        ]
+      },
+      "collisionPolicy": {
+        "type": "volume_3d"
+      },
+      "tags": [
+        "attack",
+        "lighting_probe",
+        "extruded_probe",
+        "thin"
+      ],
+      "vars": {},
+      "components": [
+        {
+          "type": "velocity_movement"
+        },
+        {
+          "type": "spin",
+          "degreesPerSecond": 210
+        },
+        {
+          "type": "lifetime",
+          "seconds": 8
+        }
+      ],
+      "events": {}
+    },
+    "probe_extruded_thick": {
+      "type": "scripted_actor",
+      "kind": "minetale:lighting_probe_extruded_thick",
+      "role": "gameplay",
+      "transform": {
+        "space": "battle.canonical",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotationDeg": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1.35,
+          1.35,
+          1.35
+        ]
+      },
+      "visual": {
+        "type": "image",
+        "mode": "3d",
+        "visible": true,
+        "rendered": {"enabled":true,"castsShadow":true,"receivesShadow":true},
+        "image": {
+          "texture": "minetale:textures/gui/battle/bullet1.png",
+          "source": [
+            0,
+            0,
+            7,
+            7
+          ],
+          "textureSize": [
+            7,
+            7
+          ],
+          "tint": "#FFFFFFFF",
+          "fit": "contain",
+          "aspect": "source",
+          "thickness": 0.22
+        }
+      },
+      "collision": {
+        "shape": "box",
+        "space": "battle.canonical",
+        "halfSize": [
+          0.07,
+          0.07,
+          0.11
+        ]
+      },
+      "collisionPolicy": {
+        "type": "volume_3d"
+      },
+      "tags": [
+        "attack",
+        "lighting_probe",
+        "extruded_probe",
+        "thick"
+      ],
+      "vars": {},
+      "components": [
+        {
+          "type": "velocity_movement"
+        },
+        {
+          "type": "spin",
+          "degreesPerSecond": 150
+        },
+        {
+          "type": "lifetime",
+          "seconds": 8
+        }
+      ],
+      "events": {}
+    }
+  },
+  "rulesets": {
+    "enemy_red_soul": {
+      "rules": [
+        {
+          "domain": "player_control",
+          "controller": {
+            "type": "red_free",
+            "moveSpeedPerSecond": 1.55,
+            "allowVertical": true,
+            "clampToBattleBox": true
+          }
+        },
+        {
+          "domain": "damage",
+          "invincibleSeconds": 0.65
+        }
+      ]
+    }
+  },
+  "patterns": {
+    "setup_default_lighting_scene": {
+      "actions": [
+        {
+          "type": "spawn_actor",
+          "prefab": "battle_frame",
+          "actorId": "battle_frame"
+        },
+        {
+          "type": "spawn_actor",
+          "prefab": "enemy_flowey",
+          "actorId": "enemy_flowey"
+        },
+        {
+          "type": "spawn_actor",
+          "prefab": "turn_banner",
+          "actorId": "turn_banner"
+        },
+        {
+          "type": "spawn_actor",
+          "prefab": "message_text",
+          "actorId": "message_text"
+        },
+        {
+          "type": "spawn_actor",
+          "prefab": "player_name",
+          "actorId": "player_name"
+        },
+        {
+          "type": "spawn_actor",
+          "prefab": "player_lv",
+          "actorId": "player_lv"
+        },
+        {
+          "type": "spawn_actor",
+          "prefab": "player_hp_label",
+          "actorId": "player_hp_label"
+        },
+        {
+          "type": "spawn_actor",
+          "prefab": "player_hp_bar",
+          "actorId": "player_hp_bar"
+        },
+        {
+          "type": "spawn_actor",
+          "prefab": "player_hp_text",
+          "actorId": "player_hp_text"
+        },
+        {
+          "type": "spawn_actor",
+          "prefab": "option_fight",
+          "actorId": "option_fight"
+        },
+        {
+          "type": "spawn_actor",
+          "prefab": "option_act",
+          "actorId": "option_act"
+        },
+        {
+          "type": "spawn_actor",
+          "prefab": "option_item",
+          "actorId": "option_item"
+        },
+        {
+          "type": "spawn_actor",
+          "prefab": "option_mercy",
+          "actorId": "option_mercy"
+        },
+        {
+          "type": "set_actor_property",
+          "target": "player",
+          "property": "bounds_center_position",
+          "value": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "type": "set_view_mode",
+          "sceneMode": "3d",
+          "viewScale": 0.82,
+          "durationSeconds": 0.8,
+          "viewMode": {
+            "type": "perspective_3d",
+            "camera": {
+              "position": [
+                3.7,
+                5.3,
+                -2.5
+              ],
+              "target": [
+                0,
+                0,
+                0
+              ],
+              "fovDegrees": 48
+            }
+          }
+        },
+        {
+          "type": "set_actor_text",
+          "actorId": "message_text",
+          "text": ""
+        },
+        {
+          "type": "set_actor_progress_value",
+          "actorId": "player_hp_bar",
+          "value": {
+            "read": "player.any.hp_percent"
+          }
+        }
+      ]
+    },
+    "sync_hp_bar": {
+      "actions": [
+        {
+          "type": "set_actor_progress_value",
+          "actorId": "player_hp_bar",
+          "value": {
+            "read": "player.any.hp_percent"
+          }
+        }
+      ]
+    },
+    "cycle_axis_baseline": {
+      "actions": [
+        {
+          "type": "set_actor_text",
+          "actorId": "turn_banner",
+          "text": "LIGHT 1/7 AXIS"
+        },
+        {
+          "type": "spawn_actor",
+          "prefab": "probe_model_static",
+          "tags": [
+            "lighting_cycle_temp",
+            "cycle_axis"
+          ],
+          "transform": {
+            "space": "battle.canonical",
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "rotationDeg": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              1.25,
+              1.25,
+              1.25
+            ]
+          }
+        },
+        {
+          "type": "spawn_actor",
+          "prefab": "probe_model_static",
+          "tags": [
+            "lighting_cycle_temp",
+            "cycle_axis"
+          ],
+          "transform": {
+            "space": "battle.canonical",
+            "position": [
+              -0.72,
+              0,
+              0
+            ],
+            "rotationDeg": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              2.0,
+              0.55,
+              0.55
+            ]
+          }
+        },
+        {
+          "type": "spawn_actor",
+          "prefab": "probe_model_static",
+          "tags": [
+            "lighting_cycle_temp",
+            "cycle_axis"
+          ],
+          "transform": {
+            "space": "battle.canonical",
+            "position": [
+              0.72,
+              0,
+              0
+            ],
+            "rotationDeg": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              2.0,
+              0.55,
+              0.55
+            ]
+          }
+        },
+        {
+          "type": "spawn_actor",
+          "prefab": "probe_model_static",
+          "tags": [
+            "lighting_cycle_temp",
+            "cycle_axis"
+          ],
+          "transform": {
+            "space": "battle.canonical",
+            "position": [
+              0,
+              -0.72,
+              0
+            ],
+            "rotationDeg": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              0.55,
+              2.0,
+              0.55
+            ]
+          }
+        },
+        {
+          "type": "spawn_actor",
+          "prefab": "probe_model_static",
+          "tags": [
+            "lighting_cycle_temp",
+            "cycle_axis"
+          ],
+          "transform": {
+            "space": "battle.canonical",
+            "position": [
+              0,
+              0.72,
+              0
+            ],
+            "rotationDeg": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              0.55,
+              2.0,
+              0.55
+            ]
+          }
+        },
+        {
+          "type": "spawn_actor",
+          "prefab": "probe_model_static",
+          "tags": [
+            "lighting_cycle_temp",
+            "cycle_axis"
+          ],
+          "transform": {
+            "space": "battle.canonical",
+            "position": [
+              0,
+              0,
+              -0.68
+            ],
+            "rotationDeg": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              0.55,
+              0.55,
+              2.0
+            ]
+          }
+        },
+        {
+          "type": "spawn_actor",
+          "prefab": "probe_model_static",
+          "tags": [
+            "lighting_cycle_temp",
+            "cycle_axis"
+          ],
+          "transform": {
+            "space": "battle.canonical",
+            "position": [
+              0,
+              0,
+              0.68
+            ],
+            "rotationDeg": [
+              0,
+              0,
+              0
+            ],
+            "scale": [
+              0.55,
+              0.55,
+              2.0
+            ]
+          }
+        },
+        {
+          "type": "wait",
+          "seconds": 4.2
+        }
+      ]
+    },
+    "cycle_shadow_sweep": {
+      "actions": [
+        {
+          "type": "set_actor_text",
+          "actorId": "turn_banner",
+          "text": "LIGHT 2/7 SWEEP"
+        },
+        {
+          "type": "parallel",
+          "actions": [
+            {
+              "type": "sequence",
+              "actions": [
+                {
+                  "type": "repeat",
+                  "count": 8,
+                  "actions": [
+                    {
+                      "type": "spawn_actor",
+                      "prefab": "probe_model_moving",
+                      "tags": [
+                        "lighting_cycle_temp",
+                        "cycle_sweep"
+                      ],
+                      "transform": {
+                        "space": "battle.canonical",
+                        "position": {
+                          "type": "vector3",
+                          "x": -0.95,
+                          "y": -0.55,
+                          "z": -0.55
+                        },
+                        "scale": [
+                          0.9,
+                          0.9,
+                          0.9
+                        ]
+                      },
+                      "velocity": {
+                        "space": "battle.canonical",
+                        "value": {
+                          "type": "vector3",
+                          "x": 0.78,
+                          "y": {
+                            "type": "random_number",
+                            "min": -0.05,
+                            "max": 0.05
+                          },
+                          "z": {
+                            "type": "random_number",
+                            "min": -0.04,
+                            "max": 0.04
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "type": "wait",
+                      "seconds": 0.28
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "sequence",
+              "actions": [
+                {
+                  "type": "repeat",
+                  "count": 8,
+                  "actions": [
+                    {
+                      "type": "spawn_actor",
+                      "prefab": "probe_model_moving",
+                      "tags": [
+                        "lighting_cycle_temp",
+                        "cycle_sweep"
+                      ],
+                      "transform": {
+                        "space": "battle.canonical",
+                        "position": {
+                          "type": "vector3",
+                          "x": -0.95,
+                          "y": 0.0,
+                          "z": 0.0
+                        },
+                        "scale": [
+                          0.9,
+                          0.9,
+                          0.9
+                        ]
+                      },
+                      "velocity": {
+                        "space": "battle.canonical",
+                        "value": {
+                          "type": "vector3",
+                          "x": 0.68,
+                          "y": {
+                            "type": "random_number",
+                            "min": -0.05,
+                            "max": 0.05
+                          },
+                          "z": {
+                            "type": "random_number",
+                            "min": -0.04,
+                            "max": 0.04
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "type": "wait",
+                      "seconds": 0.28
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "sequence",
+              "actions": [
+                {
+                  "type": "repeat",
+                  "count": 8,
+                  "actions": [
+                    {
+                      "type": "spawn_actor",
+                      "prefab": "probe_model_moving",
+                      "tags": [
+                        "lighting_cycle_temp",
+                        "cycle_sweep"
+                      ],
+                      "transform": {
+                        "space": "battle.canonical",
+                        "position": {
+                          "type": "vector3",
+                          "x": -0.95,
+                          "y": 0.55,
+                          "z": 0.55
+                        },
+                        "scale": [
+                          0.9,
+                          0.9,
+                          0.9
+                        ]
+                      },
+                      "velocity": {
+                        "space": "battle.canonical",
+                        "value": {
+                          "type": "vector3",
+                          "x": 0.58,
+                          "y": {
+                            "type": "random_number",
+                            "min": -0.05,
+                            "max": 0.05
+                          },
+                          "z": {
+                            "type": "random_number",
+                            "min": -0.04,
+                            "max": 0.04
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "type": "wait",
+                      "seconds": 0.28
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "wait",
+          "seconds": 3.6
+        }
+      ]
+    },
+    "cycle_depth_curtains": {
+      "actions": [
+        {
+          "type": "set_actor_text",
+          "actorId": "turn_banner",
+          "text": "LIGHT 3/7 DEPTH"
+        },
+        {
+          "type": "parallel",
+          "actions": [
+            {
+              "type": "sequence",
+              "actions": [
+                {
+                  "type": "repeat",
+                  "count": 11,
+                  "actions": [
+                    {
+                      "type": "spawn_actor",
+                      "prefab": "probe_model_moving",
+                      "tags": [
+                        "lighting_cycle_temp",
+                        "cycle_depth",
+                        "from_negative_z"
+                      ],
+                      "transform": {
+                        "space": "battle.canonical",
+                        "position": {
+                          "type": "vector3",
+                          "x": {
+                            "type": "random_number",
+                            "min": -0.82,
+                            "max": 0.82
+                          },
+                          "y": {
+                            "type": "random_number",
+                            "min": -0.72,
+                            "max": 0.72
+                          },
+                          "z": -0.92
+                        }
+                      },
+                      "velocity": {
+                        "space": "battle.canonical",
+                        "value": {
+                          "type": "vector3",
+                          "x": {
+                            "type": "random_number",
+                            "min": -0.05,
+                            "max": 0.05
+                          },
+                          "y": {
+                            "type": "random_number",
+                            "min": -0.05,
+                            "max": 0.05
+                          },
+                          "z": {
+                            "type": "random_number",
+                            "min": 0.62,
+                            "max": 0.82
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "type": "wait",
+                      "seconds": 0.2
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "sequence",
+              "actions": [
+                {
+                  "type": "repeat",
+                  "count": 11,
+                  "actions": [
+                    {
+                      "type": "spawn_actor",
+                      "prefab": "probe_model_moving",
+                      "tags": [
+                        "lighting_cycle_temp",
+                        "cycle_depth",
+                        "from_positive_z"
+                      ],
+                      "transform": {
+                        "space": "battle.canonical",
+                        "position": {
+                          "type": "vector3",
+                          "x": {
+                            "type": "random_number",
+                            "min": -0.82,
+                            "max": 0.82
+                          },
+                          "y": {
+                            "type": "random_number",
+                            "min": -0.72,
+                            "max": 0.72
+                          },
+                          "z": 0.92
+                        }
+                      },
+                      "velocity": {
+                        "space": "battle.canonical",
+                        "value": {
+                          "type": "vector3",
+                          "x": {
+                            "type": "random_number",
+                            "min": -0.05,
+                            "max": 0.05
+                          },
+                          "y": {
+                            "type": "random_number",
+                            "min": -0.05,
+                            "max": 0.05
+                          },
+                          "z": {
+                            "type": "random_number",
+                            "min": -0.82,
+                            "max": -0.62
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "type": "wait",
+                      "seconds": 0.2
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "wait",
+          "seconds": 3.7
+        }
+      ]
+    },
+    "cycle_height_rain": {
+      "actions": [
+        {
+          "type": "set_actor_text",
+          "actorId": "turn_banner",
+          "text": "LIGHT 4/7 HEIGHT"
+        },
+        {
+          "type": "parallel",
+          "actions": [
+            {
+              "type": "sequence",
+              "actions": [
+                {
+                  "type": "repeat",
+                  "count": 10,
+                  "actions": [
+                    {
+                      "type": "spawn_actor",
+                      "prefab": "probe_model_moving",
+                      "tags": [
+                        "lighting_cycle_temp",
+                        "cycle_height",
+                        "from_top"
+                      ],
+                      "transform": {
+                        "space": "battle.canonical",
+                        "position": {
+                          "type": "vector3",
+                          "x": {
+                            "type": "random_number",
+                            "min": -0.82,
+                            "max": 0.82
+                          },
+                          "y": 0.92,
+                          "z": {
+                            "type": "random_number",
+                            "min": -0.72,
+                            "max": 0.72
+                          }
+                        }
+                      },
+                      "velocity": {
+                        "space": "battle.canonical",
+                        "value": {
+                          "type": "vector3",
+                          "x": {
+                            "type": "random_number",
+                            "min": -0.07,
+                            "max": 0.07
+                          },
+                          "y": {
+                            "type": "random_number",
+                            "min": -0.88,
+                            "max": -0.68
+                          },
+                          "z": {
+                            "type": "random_number",
+                            "min": -0.05,
+                            "max": 0.05
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "type": "wait",
+                      "seconds": 0.22
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "sequence",
+              "actions": [
+                {
+                  "type": "repeat",
+                  "count": 10,
+                  "actions": [
+                    {
+                      "type": "spawn_actor",
+                      "prefab": "probe_model_moving",
+                      "tags": [
+                        "lighting_cycle_temp",
+                        "cycle_height",
+                        "from_bottom"
+                      ],
+                      "transform": {
+                        "space": "battle.canonical",
+                        "position": {
+                          "type": "vector3",
+                          "x": {
+                            "type": "random_number",
+                            "min": -0.82,
+                            "max": 0.82
+                          },
+                          "y": -0.92,
+                          "z": {
+                            "type": "random_number",
+                            "min": -0.72,
+                            "max": 0.72
+                          }
+                        }
+                      },
+                      "velocity": {
+                        "space": "battle.canonical",
+                        "value": {
+                          "type": "vector3",
+                          "x": {
+                            "type": "random_number",
+                            "min": -0.07,
+                            "max": 0.07
+                          },
+                          "y": {
+                            "type": "random_number",
+                            "min": 0.68,
+                            "max": 0.88
+                          },
+                          "z": {
+                            "type": "random_number",
+                            "min": -0.05,
+                            "max": 0.05
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "type": "wait",
+                      "seconds": 0.22
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "wait",
+          "seconds": 3.7
+        }
+      ]
+    },
+    "cycle_extruded_fan": {
+      "actions": [
+        {
+          "type": "set_actor_text",
+          "actorId": "turn_banner",
+          "text": "LIGHT 5/7 EXTRUDE"
+        },
+        {
+          "type": "parallel",
+          "actions": [
+            {
+              "type": "sequence",
+              "actions": [
+                {
+                  "type": "repeat",
+                  "count": 9,
+                  "actions": [
+                    {
+                      "type": "spawn_actor",
+                      "prefab": "probe_extruded_thin",
+                      "tags": [
+                        "lighting_cycle_temp",
+                        "cycle_extrude",
+                        "thin"
+                      ],
+                      "transform": {
+                        "space": "battle.canonical",
+                        "position": {
+                          "type": "vector3",
+                          "x": -0.92,
+                          "y": {
+                            "type": "random_number",
+                            "min": -0.75,
+                            "max": 0.75
+                          },
+                          "z": {
+                            "type": "random_number",
+                            "min": -0.65,
+                            "max": 0.65
+                          }
+                        },
+                        "rotationDeg": {
+                          "type": "vector3",
+                          "x": {
+                            "type": "random_number",
+                            "min": -35,
+                            "max": 35
+                          },
+                          "y": {
+                            "type": "random_number",
+                            "min": -35,
+                            "max": 35
+                          },
+                          "z": {
+                            "type": "random_number",
+                            "min": -180,
+                            "max": 180
+                          }
+                        }
+                      },
+                      "velocity": {
+                        "space": "battle.canonical",
+                        "value": {
+                          "type": "vector3",
+                          "x": {
+                            "type": "random_number",
+                            "min": 0.62,
+                            "max": 0.82
+                          },
+                          "y": {
+                            "type": "random_number",
+                            "min": -0.08,
+                            "max": 0.08
+                          },
+                          "z": {
+                            "type": "random_number",
+                            "min": -0.08,
+                            "max": 0.08
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "type": "wait",
+                      "seconds": 0.24
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "sequence",
+              "actions": [
+                {
+                  "type": "repeat",
+                  "count": 9,
+                  "actions": [
+                    {
+                      "type": "spawn_actor",
+                      "prefab": "probe_extruded_thick",
+                      "tags": [
+                        "lighting_cycle_temp",
+                        "cycle_extrude",
+                        "thick"
+                      ],
+                      "transform": {
+                        "space": "battle.canonical",
+                        "position": {
+                          "type": "vector3",
+                          "x": 0.92,
+                          "y": {
+                            "type": "random_number",
+                            "min": -0.75,
+                            "max": 0.75
+                          },
+                          "z": {
+                            "type": "random_number",
+                            "min": -0.65,
+                            "max": 0.65
+                          }
+                        },
+                        "rotationDeg": {
+                          "type": "vector3",
+                          "x": {
+                            "type": "random_number",
+                            "min": -35,
+                            "max": 35
+                          },
+                          "y": {
+                            "type": "random_number",
+                            "min": -35,
+                            "max": 35
+                          },
+                          "z": {
+                            "type": "random_number",
+                            "min": -180,
+                            "max": 180
+                          }
+                        }
+                      },
+                      "velocity": {
+                        "space": "battle.canonical",
+                        "value": {
+                          "type": "vector3",
+                          "x": {
+                            "type": "random_number",
+                            "min": -0.82,
+                            "max": -0.62
+                          },
+                          "y": {
+                            "type": "random_number",
+                            "min": -0.08,
+                            "max": 0.08
+                          },
+                          "z": {
+                            "type": "random_number",
+                            "min": -0.08,
+                            "max": 0.08
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "type": "wait",
+                      "seconds": 0.24
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "wait",
+          "seconds": 4.0
+        }
+      ]
+    },
+    "cycle_bounce_room": {
+      "actions": [
+        {
+          "type": "set_actor_text",
+          "actorId": "turn_banner",
+          "text": "LIGHT 6/7 BOUNCE"
+        },
+        {
+          "type": "repeat",
+          "count": 12,
+          "actions": [
+            {
+              "type": "spawn_actor",
+              "prefab": "probe_model_bounce",
+              "tags": [
+                "lighting_cycle_temp",
+                "cycle_bounce"
+              ],
+              "transform": {
+                "space": "battle.canonical",
+                "position": {
+                  "type": "vector3",
+                  "x": {
+                    "type": "random_number",
+                    "min": -0.62,
+                    "max": 0.62
+                  },
+                  "y": {
+                    "type": "random_number",
+                    "min": -0.62,
+                    "max": 0.62
+                  },
+                  "z": {
+                    "type": "random_number",
+                    "min": -0.52,
+                    "max": 0.52
+                  }
+                },
+                "scale": [
+                  0.95,
+                  0.95,
+                  0.95
+                ]
+              },
+              "velocity": {
+                "space": "battle.canonical",
+                "value": {
+                  "type": "vector3",
+                  "x": {
+                    "type": "random_number",
+                    "min": -1.05,
+                    "max": 1.05
+                  },
+                  "y": {
+                    "type": "random_number",
+                    "min": -1.05,
+                    "max": 1.05
+                  },
+                  "z": {
+                    "type": "random_number",
+                    "min": -0.9,
+                    "max": 0.9
+                  }
+                }
+              }
+            },
+            {
+              "type": "wait",
+              "seconds": 0.16
+            }
+          ]
+        },
+        {
+          "type": "wait",
+          "seconds": 5.0
+        }
+      ]
+    },
+    "cycle_mixed_occlusion": {
+      "actions": [
+        {
+          "type": "set_actor_text",
+          "actorId": "turn_banner",
+          "text": "LIGHT 7/7 MIXED"
+        },
+        {
+          "type": "parallel",
+          "actions": [
+            {
+              "type": "sequence",
+              "actions": [
+                {
+                  "type": "repeat",
+                  "count": 10,
+                  "actions": [
+                    {
+                      "type": "spawn_actor",
+                      "prefab": "probe_model_moving",
+                      "tags": [
+                        "lighting_cycle_temp",
+                        "cycle_mixed",
+                        "model_x"
+                      ],
+                      "transform": {
+                        "space": "battle.canonical",
+                        "position": {
+                          "type": "vector3",
+                          "x": -0.92,
+                          "y": {
+                            "type": "random_number",
+                            "min": -0.32,
+                            "max": 0.32
+                          },
+                          "z": -0.22
+                        }
+                      },
+                      "velocity": {
+                        "space": "battle.canonical",
+                        "value": {
+                          "type": "vector3",
+                          "x": {
+                            "type": "random_number",
+                            "min": 0.72,
+                            "max": 0.9
+                          },
+                          "y": {
+                            "type": "random_number",
+                            "min": -0.03,
+                            "max": 0.03
+                          },
+                          "z": {
+                            "type": "random_number",
+                            "min": -0.02,
+                            "max": 0.02
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "type": "wait",
+                      "seconds": 0.18
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "sequence",
+              "actions": [
+                {
+                  "type": "repeat",
+                  "count": 10,
+                  "actions": [
+                    {
+                      "type": "spawn_actor",
+                      "prefab": "probe_extruded_thick",
+                      "tags": [
+                        "lighting_cycle_temp",
+                        "cycle_mixed",
+                        "extruded_x"
+                      ],
+                      "transform": {
+                        "space": "battle.canonical",
+                        "position": {
+                          "type": "vector3",
+                          "x": 0.92,
+                          "y": {
+                            "type": "random_number",
+                            "min": -0.32,
+                            "max": 0.32
+                          },
+                          "z": 0.22
+                        },
+                        "rotationDeg": {
+                          "type": "vector3",
+                          "x": {
+                            "type": "random_number",
+                            "min": -20,
+                            "max": 20
+                          },
+                          "y": {
+                            "type": "random_number",
+                            "min": -20,
+                            "max": 20
+                          },
+                          "z": {
+                            "type": "random_number",
+                            "min": -180,
+                            "max": 180
+                          }
+                        }
+                      },
+                      "velocity": {
+                        "space": "battle.canonical",
+                        "value": {
+                          "type": "vector3",
+                          "x": {
+                            "type": "random_number",
+                            "min": -0.9,
+                            "max": -0.72
+                          },
+                          "y": {
+                            "type": "random_number",
+                            "min": -0.03,
+                            "max": 0.03
+                          },
+                          "z": {
+                            "type": "random_number",
+                            "min": -0.02,
+                            "max": 0.02
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "type": "wait",
+                      "seconds": 0.18
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "sequence",
+              "actions": [
+                {
+                  "type": "repeat",
+                  "count": 10,
+                  "actions": [
+                    {
+                      "type": "spawn_actor",
+                      "prefab": "probe_extruded_thin",
+                      "tags": [
+                        "lighting_cycle_temp",
+                        "cycle_mixed",
+                        "depth_stream"
+                      ],
+                      "transform": {
+                        "space": "battle.canonical",
+                        "position": {
+                          "type": "vector3",
+                          "x": {
+                            "type": "random_number",
+                            "min": -0.35,
+                            "max": 0.35
+                          },
+                          "y": {
+                            "type": "random_number",
+                            "min": -0.35,
+                            "max": 0.35
+                          },
+                          "z": -0.92
+                        },
+                        "rotationDeg": {
+                          "type": "vector3",
+                          "x": {
+                            "type": "random_number",
+                            "min": -30,
+                            "max": 30
+                          },
+                          "y": {
+                            "type": "random_number",
+                            "min": -30,
+                            "max": 30
+                          },
+                          "z": {
+                            "type": "random_number",
+                            "min": -180,
+                            "max": 180
+                          }
+                        }
+                      },
+                      "velocity": {
+                        "space": "battle.canonical",
+                        "value": {
+                          "type": "vector3",
+                          "x": {
+                            "type": "random_number",
+                            "min": -0.03,
+                            "max": 0.03
+                          },
+                          "y": {
+                            "type": "random_number",
+                            "min": -0.03,
+                            "max": 0.03
+                          },
+                          "z": {
+                            "type": "random_number",
+                            "min": 0.72,
+                            "max": 0.9
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "type": "wait",
+                      "seconds": 0.18
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "wait",
+          "seconds": 4.4
+        }
+      ]
+    }
+  },
+  "outcomes": {},
+  "phaseGraph": {
+    "entry": "enemy_turn_lighting_test",
+    "phases": {
+      "enemy_turn_lighting_test": {
+        "rulesets": [
+          "enemy_red_soul"
+        ],
+        "onEnter": [
+          {
+            "type": "if",
+            "when": {
+              "read": "script.var:cycle_index",
+              "op": "eq",
+              "right": 0
+            },
+            "actions": [
+              {
+                "type": "call_pattern",
+                "id": "setup_default_lighting_scene"
+              },
+              {
+                "type": "wait",
+                "seconds": 0.9
+              }
+            ]
+          },
+          {
+            "type": "cleanup_tag",
+            "tag": "lighting_cycle_temp"
+          },
+          {
+            "type": "set_var",
+            "var": "cycle_mode",
+            "value": {
+              "type": "mod",
+              "left": {
+                "read": "script.var:cycle_index"
+              },
+              "right": 7
+            }
+          },
+          {
+            "type": "if",
+            "when": {
+              "read": "script.var:cycle_mode",
+              "op": "eq",
+              "right": 0
+            },
+            "actions": [
+              {
+                "type": "call_pattern",
+                "id": "cycle_axis_baseline"
+              }
+            ]
+          },
+          {
+            "type": "if",
+            "when": {
+              "read": "script.var:cycle_mode",
+              "op": "eq",
+              "right": 1
+            },
+            "actions": [
+              {
+                "type": "call_pattern",
+                "id": "cycle_shadow_sweep"
+              }
+            ]
+          },
+          {
+            "type": "if",
+            "when": {
+              "read": "script.var:cycle_mode",
+              "op": "eq",
+              "right": 2
+            },
+            "actions": [
+              {
+                "type": "call_pattern",
+                "id": "cycle_depth_curtains"
+              }
+            ]
+          },
+          {
+            "type": "if",
+            "when": {
+              "read": "script.var:cycle_mode",
+              "op": "eq",
+              "right": 3
+            },
+            "actions": [
+              {
+                "type": "call_pattern",
+                "id": "cycle_height_rain"
+              }
+            ]
+          },
+          {
+            "type": "if",
+            "when": {
+              "read": "script.var:cycle_mode",
+              "op": "eq",
+              "right": 4
+            },
+            "actions": [
+              {
+                "type": "call_pattern",
+                "id": "cycle_extruded_fan"
+              }
+            ]
+          },
+          {
+            "type": "if",
+            "when": {
+              "read": "script.var:cycle_mode",
+              "op": "eq",
+              "right": 5
+            },
+            "actions": [
+              {
+                "type": "call_pattern",
+                "id": "cycle_bounce_room"
+              }
+            ]
+          },
+          {
+            "type": "if",
+            "when": {
+              "read": "script.var:cycle_mode",
+              "op": "eq",
+              "right": 6
+            },
+            "actions": [
+              {
+                "type": "call_pattern",
+                "id": "cycle_mixed_occlusion"
+              }
+            ]
+          },
+          {
+            "type": "modify_var",
+            "var": "cycle_index",
+            "op": "add",
+            "amount": 1
+          },
+          {
+            "type": "cleanup_tag",
+            "tag": "lighting_cycle_temp"
+          },
+          {
+            "type": "wait",
+            "seconds": 0.8
+          },
+          {
+            "type": "end_phase",
+            "to": "enemy_turn_lighting_test"
+          }
+        ],
+        "onTick": [
+          {
+            "type": "call_pattern",
+            "id": "sync_hp_bar"
+          }
+        ]
+      }
+    }
+  },
+  "budgets": {
+    "maxActorSpawnsPerTick": 128,
+    "maxSignalDispatchPerTick": 512,
+    "maxLoopIterations": 1024,
+    "maxRecursionDepth": 64,
+    "maxRuleStackDepth": 64,
+    "maxActionsPerStackPerTick": 512,
+    "maxActionsPerBattleTick": 2048,
+    "maxRenderRequestsPerTick": 64
+  },
+  "editorHints": {
+    "purpose": "battle_renderer_v2_lighting_shadow_cycle_test",
+    "referenceLayout": "debug/default.json 3D enemy turn layout"
+  }
+}

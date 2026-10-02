@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube_directional",
+  "textures": {
+    "down": "minecraft:block/lodestone_side",
+    "east": "minecraft:block/lodestone_side",
+    "north": "minecraft:block/jigsaw_top",
+    "particle": "minecraft:block/lodestone_top",
+    "south": "minecraft:block/lodestone_side",
+    "up": "minecraft:block/lodestone_top",
+    "west": "minecraft:block/lodestone_side"
+  }
+}

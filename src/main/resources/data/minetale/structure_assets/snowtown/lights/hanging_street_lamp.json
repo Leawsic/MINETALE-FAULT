@@ -1,0 +1,23 @@
+{
+  "template": "minetale:snowtown/lights/hanging_street_lamp",
+  "role": "decoration",
+  "category": "minecraft:decoration",
+  "weight": 1,
+  "tags": [
+    "minecraft:decoration"
+  ],
+  "footprint": {
+    "width": 1,
+    "height": 4,
+    "depth": 2,
+    "foundation_depth": 0,
+    "max_slope": 0,
+    "allow_liquid": false,
+    "require_surface": false
+  },
+  "placement": {
+    "can_rotate": true,
+    "can_mirror": false
+  },
+  "scan_markers": true
+}

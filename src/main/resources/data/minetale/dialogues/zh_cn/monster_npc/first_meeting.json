@@ -1,0 +1,25 @@
+{
+  "placement": "bottom",
+  "portrait_mode": "no_portrait",
+  "body": {
+    "id": "root",
+    "type": "sequence",
+    "children": [
+      {
+        "id": "remember_first_talk",
+        "type": "add",
+        "state": "minetale:snowtown_resident_talk_count",
+        "value": 1
+      },
+      {
+        "id": "greeting",
+        "type": "page",
+        "lines": [
+          {
+            "literal": "第一次来雪镇吗？别只沿着大路走，巷子里也很热闹。"
+          }
+        ]
+      }
+    ]
+  }
+}

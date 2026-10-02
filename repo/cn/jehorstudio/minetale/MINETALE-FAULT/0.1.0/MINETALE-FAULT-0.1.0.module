@@ -1,0 +1,118 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "cn.jehorstudio.minetale",
+    "module": "MINETALE-FAULT",
+    "version": "0.1.0",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "9.2.1"
+    }
+  },
+  "variants": [
+    {
+      "name": "apiElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 21,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-api"
+      },
+      "files": [
+        {
+          "name": "MINETALE-FAULT-0.1.0.jar",
+          "url": "MINETALE-FAULT-0.1.0.jar",
+          "size": 50836745,
+          "sha512": "bdce0e9abe5110dcbf290b884d2fe8e0b035bbaf76048c805897e4081969d85601e0fb4630a231a900361b26f00c034a138dfa0920ba0c6e36acd007d1b36737",
+          "sha256": "ac943c698651585ba2686819f1ffddbd69d7518a889a1c6ce3577ea98fc60429",
+          "sha1": "d682336fdf263540a7286591c3751ee4802f257d",
+          "md5": "620d7014b0a187f98ce977e20a418f41"
+        }
+      ]
+    },
+    {
+      "name": "runtimeElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 21,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime"
+      },
+      "dependencies": [
+        {
+          "group": "software.bernie.geckolib",
+          "module": "geckolib-neoforge-1.21.10",
+          "version": {
+            "requires": "5.3-alpha-3"
+          }
+        },
+        {
+          "group": "org.tukaani",
+          "module": "xz",
+          "version": {
+            "requires": "1.12"
+          }
+        },
+        {
+          "group": "com.twelvemonkeys.imageio",
+          "module": "imageio-webp",
+          "version": {
+            "requires": "3.13.1"
+          }
+        },
+        {
+          "group": "com.twelvemonkeys.imageio",
+          "module": "imageio-core",
+          "version": {
+            "requires": "3.13.1"
+          }
+        },
+        {
+          "group": "com.twelvemonkeys.imageio",
+          "module": "imageio-metadata",
+          "version": {
+            "requires": "3.13.1"
+          }
+        },
+        {
+          "group": "com.twelvemonkeys.common",
+          "module": "common-lang",
+          "version": {
+            "requires": "3.13.1"
+          }
+        },
+        {
+          "group": "com.twelvemonkeys.common",
+          "module": "common-io",
+          "version": {
+            "requires": "3.13.1"
+          }
+        },
+        {
+          "group": "com.twelvemonkeys.common",
+          "module": "common-image",
+          "version": {
+            "requires": "3.13.1"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "MINETALE-FAULT-0.1.0.jar",
+          "url": "MINETALE-FAULT-0.1.0.jar",
+          "size": 50836745,
+          "sha512": "bdce0e9abe5110dcbf290b884d2fe8e0b035bbaf76048c805897e4081969d85601e0fb4630a231a900361b26f00c034a138dfa0920ba0c6e36acd007d1b36737",
+          "sha256": "ac943c698651585ba2686819f1ffddbd69d7518a889a1c6ce3577ea98fc60429",
+          "sha1": "d682336fdf263540a7286591c3751ee4802f257d",
+          "md5": "620d7014b0a187f98ce977e20a418f41"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "template": "minetale:snowtown/lights/four_way_street_lamp",
+  "role": "decoration",
+  "category": "minecraft:decoration",
+  "weight": 1,
+  "tags": [
+    "minecraft:decoration"
+  ],
+  "footprint": {
+    "width": 3,
+    "height": 7,
+    "depth": 3,
+    "foundation_depth": 0,
+    "max_slope": 0,
+    "allow_liquid": false,
+    "require_surface": false
+  },
+  "placement": {
+    "can_rotate": true,
+    "can_mirror": false
+  },
+  "scan_markers": false
+}

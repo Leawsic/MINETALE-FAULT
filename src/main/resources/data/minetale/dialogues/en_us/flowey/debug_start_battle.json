@@ -1,0 +1,12 @@
+{
+  "placement": "top",
+  "portrait_mode": "no_portrait",
+  "body": {
+    "id": "start_battle_test",
+    "type": "start_battle",
+    "battle": "minetale:debug/default",
+    "participants": {
+      "scope": "self"
+    }
+  }
+}

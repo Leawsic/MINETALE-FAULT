@@ -1,0 +1,59 @@
+{
+  "ui.select": {
+    "sounds": [
+      {
+        "name": "minetale:ui/select",
+        "preload": true
+      }
+    ]
+  },
+  "ui.confirm": {
+    "sounds": [
+      {
+        "name": "minetale:ui/confirm",
+        "preload": true
+      }
+    ]
+  },
+  "battle.soul_hurt": {
+    "sounds": [
+      {
+        "name": "minetale:battle/soul_hurt",
+        "preload": true
+      }
+    ]
+  },
+  "battle.start": {
+    "sounds": ["minetale:battle/start"]
+  },
+  "dialogue.flowey_voice": {
+    "sounds": [
+      {
+        "name": "minetale:dialogue/flowey_voice",
+        "preload": true
+      }
+    ]
+  },
+  "dialogue.flowey_voice_alt": {
+    "sounds": [
+      {
+        "name": "minetale:dialogue/flowey_voice",
+        "preload": true
+      }
+    ]
+  },
+  "dialogue.flowey_page_open": {
+    "sounds": ["minetale:dialogue/flowey_page_open"]
+  },
+  "battle.bullet_whoosh": {
+    "sounds": ["minetale:battle/bullet_whoosh"]
+  },
+  "music.battle_default": {
+    "sounds": [
+      {
+        "name": "minetale:music/battle_default",
+        "stream": true
+      }
+    ]
+  }
+}

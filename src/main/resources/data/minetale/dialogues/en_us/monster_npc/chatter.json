@@ -1,0 +1,25 @@
+{
+  "placement": "bottom",
+  "portrait_mode": "no_portrait",
+  "body": {
+    "id": "root",
+    "type": "sequence",
+    "children": [
+      {
+        "id": "count_talk",
+        "type": "add",
+        "state": "minetale:snowtown_resident_talk_count",
+        "value": 1
+      },
+      {
+        "id": "choose_chatter",
+        "type": "shuffle_cycle",
+        "packages": [
+          "minetale:monster_npc/chatter/weather",
+          "minetale:monster_npc/chatter/town",
+          "minetale:monster_npc/chatter/travel"
+        ]
+      }
+    ]
+  }
+}

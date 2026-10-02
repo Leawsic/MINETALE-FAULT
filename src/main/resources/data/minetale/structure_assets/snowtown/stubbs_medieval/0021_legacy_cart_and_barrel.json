@@ -1,0 +1,23 @@
+{
+  "template": "minetale:snowtown/stubbs_medieval/0021_legacy_cart_and_barrel",
+  "role": "building",
+  "category": "minecraft:building",
+  "weight": 1,
+  "tags": [
+    "minecraft:building"
+  ],
+  "footprint": {
+    "width": 13,
+    "height": 6,
+    "depth": 5,
+    "foundation_depth": 0,
+    "max_slope": 0,
+    "allow_liquid": false,
+    "require_surface": false
+  },
+  "placement": {
+    "can_rotate": true,
+    "can_mirror": false
+  },
+  "scan_markers": true
+}

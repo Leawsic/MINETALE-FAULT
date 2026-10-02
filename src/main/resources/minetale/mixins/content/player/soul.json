@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "cn.jehorstudio.minetale.content.player.soul.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "common.CompoundContainerAccessor",
+    "common.HorseInventoryMenuAccessor"
+  ],
+  "client": [
+    "client.ItemInHandRendererInvoker"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

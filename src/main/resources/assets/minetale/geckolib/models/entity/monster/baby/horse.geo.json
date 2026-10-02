@@ -1,0 +1,104 @@
+{
+	"format_version": "1.12.0",
+	"minecraft:geometry": [
+		{
+			"description": {
+				"identifier": "geometry.horse_baby",
+				"texture_width": 64,
+				"texture_height": 64,
+				"visible_bounds_width": 3,
+				"visible_bounds_height": 3.5,
+				"visible_bounds_offset": [0, 1.25, 0]
+			},
+			"bones": [
+				{
+					"name": "root",
+					"pivot": [0, 0, 0]
+				},
+				{
+					"name": "torso",
+					"parent": "root",
+					"pivot": [0, 9, 0],
+					"cubes": [
+						{"origin": [-4, 12.5, -7], "size": [8, 7, 14], "pivot": [0, 16, 0], "rotation": [-90, 0, 0], "uv": [0, 13]}
+					]
+				},
+				{
+					"name": "head",
+					"parent": "torso",
+					"pivot": [0, 23, -1.2],
+					"cubes": [
+						{"origin": [-3, 31, -8.45], "size": [6, 4, 9], "uv": [0, 0]}
+					]
+				},
+				{
+					"name": "head_parts",
+					"parent": "head",
+					"pivot": [0, 25, -1.4499],
+					"cubes": [
+						{"origin": [-2, 23, -3.4499], "size": [4, 8, 4], "uv": [30, 0]}
+					]
+				},
+				{
+					"name": "left_ear",
+					"parent": "head",
+					"pivot": [2, 35.3, 0.2001],
+					"rotation": [0, 0, 15],
+					"cubes": [
+						{"origin": [1, 34.8, -0.5999], "size": [2, 3, 1], "uv": [0, 4]}
+					]
+				},
+				{
+					"name": "right_ear",
+					"parent": "head",
+					"pivot": [-2, 35.3, -0.1],
+					"rotation": [0, 0, -15],
+					"cubes": [
+						{"origin": [-3, 34.8, -0.6], "size": [2, 3, 1], "uv": [0, 0]}
+					]
+				},
+				{
+					"name": "left_arm",
+					"parent": "torso",
+					"pivot": [5.5, 23, 0],
+					"cubes": [
+						{"origin": [4, 14, -1.5], "size": [3, 9, 3], "uv": [12, 34]}
+					]
+				},
+				{
+					"name": "right_arm",
+					"parent": "torso",
+					"pivot": [-5.5, 23, 0],
+					"cubes": [
+						{"origin": [-7, 14, -1.5], "size": [3, 9, 3], "uv": [0, 34]}
+					]
+				},
+				{
+					"name": "tail",
+					"parent": "torso",
+					"pivot": [0, 13.9, 3.5],
+					"rotation": [-10, 0, 0],
+					"cubes": [
+						{"origin": [-1.5, 12.4, 3.5], "size": [3, 3, 8], "uv": [24, 34]}
+					]
+				},
+				{
+					"name": "left_leg",
+					"parent": "root",
+					"pivot": [2.24, 9, 0],
+					"cubes": [
+						{"origin": [0.74, 0, -1.5], "size": [3, 9, 3], "uv": [12, 46]}
+					]
+				},
+				{
+					"name": "right_leg",
+					"parent": "root",
+					"pivot": [-2.24, 9, 0],
+					"cubes": [
+						{"origin": [-3.74, 0, -1.5], "size": [3, 9, 3], "uv": [0, 46]}
+					]
+				}
+			]
+		}
+	]
+}

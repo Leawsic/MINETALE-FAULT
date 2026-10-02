@@ -1,0 +1,25 @@
+{
+  "placement": "bottom",
+  "portrait_mode": "no_portrait",
+  "body": {
+    "id": "root",
+    "type": "sequence",
+    "children": [
+      {
+        "id": "remember_first_talk",
+        "type": "add",
+        "state": "minetale:snowtown_resident_talk_count",
+        "value": 1
+      },
+      {
+        "id": "greeting",
+        "type": "page",
+        "lines": [
+          {
+            "literal": "First time in Snowtown? Don't stick to the main road—the side streets are lively too."
+          }
+        ]
+      }
+    ]
+  }
+}

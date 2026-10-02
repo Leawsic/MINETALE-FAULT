@@ -1,0 +1,465 @@
+{
+  "schemaVersion": 1,
+  "id": "minetale:debug/post_blur_acceptance",
+  "metadata": {
+    "displayName": "Battle Renderer V2 Bloom Acceptance",
+    "description": "高品质 Bloom 的人工截图验收场景：包含多色、多尺度、细线、边缘和前后遮挡探针。"
+  },
+  "variables": {},
+  "imports": {
+    "actorPrefabs": [],
+    "rulesets": [],
+    "patterns": [],
+    "outcomes": []
+  },
+  "events": {},
+  "actors": {
+    "battle_frame": {
+      "type": "scripted_actor",
+      "kind": "minetale:post_blur_acceptance_frame",
+      "role": "hybrid",
+      "transform": {
+        "space": "battle.canonical",
+        "position": [0, 0, 0],
+        "rotationDeg": [0, 0, 0],
+        "scale": [1.4, 1.4, 1.2]
+      },
+      "visual": {
+        "type": "frame",
+        "mode": "dual",
+        "visible": true,
+        "rendered": {
+          "enabled": true,
+          "castsShadow": false,
+          "receivesShadow": true
+        },
+        "frame": {
+          "worldSize": [2, 2, 2],
+          "thickness": 0.035,
+          "borderColor": "#A0A0A0FF"
+        }
+      },
+      "collision": {
+        "shape": "box",
+        "space": "battle.canonical",
+        "halfSize": [1, 1, 1]
+      },
+      "tags": ["post_blur_acceptance", "primary_frame"],
+      "vars": {},
+      "components": [],
+      "events": {}
+    },
+    "emissive_probe": {
+      "type": "scripted_actor",
+      "kind": "minetale:post_blur_emissive_probe",
+      "role": "presentation",
+      "transform": {
+        "space": "battle.canonical",
+        "position": [0, 0, 0],
+        "rotationDeg": [0, 0, 0],
+        "scale": [1, 1, 1]
+      },
+      "visual": {
+        "type": "image_model",
+        "mode": "dual",
+        "visible": true,
+        "rendered": {
+          "enabled": true,
+          "castsShadow": false,
+          "receivesShadow": false
+        },
+        "image": {
+          "texture": "minetale:textures/mod/soul.png",
+          "source": [0, 0, 64, 64],
+          "textureSize": [64, 64],
+          "tint": "#FFFFFFFF",
+          "fit": "contain",
+          "aspect": "source"
+        },
+        "model": {
+          "id": "soul",
+          "tint": "#FFFFFFFF",
+          "scale": [0.16, 0.16, 0.16]
+        }
+      },
+      "collision": {
+        "shape": "none"
+      },
+      "tags": ["post_blur_acceptance", "emissive_probe"],
+      "vars": {},
+      "components": [],
+      "events": {}
+    },
+    "occluder": {
+      "type": "scripted_actor",
+      "kind": "minetale:post_blur_occluder",
+      "role": "presentation",
+      "transform": {
+        "space": "battle.canonical",
+        "position": [0, 0, 0],
+        "rotationDeg": [0, 0, 0],
+        "scale": [1, 1, 1]
+      },
+      "visual": {
+        "type": "image_model",
+        "mode": "dual",
+        "visible": true,
+        "rendered": {
+          "enabled": true,
+          "castsShadow": true,
+          "receivesShadow": true
+        },
+        "image": {
+          "texture": "minetale:textures/gui/battle/bullet1.png",
+          "source": [0, 0, 7, 7],
+          "textureSize": [7, 7],
+          "tint": "#707070FF",
+          "fit": "contain",
+          "aspect": "source"
+        },
+        "model": {
+          "id": "bullet1",
+          "tint": "#707070FF",
+          "scale": [0.22, 0.22, 0.22]
+        }
+      },
+      "collision": {
+        "shape": "none"
+      },
+      "tags": ["post_blur_acceptance", "occluder"],
+      "vars": {},
+      "components": [],
+      "events": {}
+    }
+  },
+  "rulesets": {
+    "acceptance_controls": {
+      "rules": [
+        {
+          "domain": "player_control",
+          "controller": {
+            "type": "red_free",
+            "moveSpeedPerSecond": 1.2,
+            "allowVertical": true,
+            "clampToBattleBox": true
+          }
+        },
+        {
+          "domain": "damage",
+          "invincibleSeconds": 999
+        }
+      ]
+    }
+  },
+  "patterns": {
+    "setup_scene": {
+      "actions": [
+        {
+          "type": "spawn_actor",
+          "prefab": "battle_frame",
+          "actorId": "battle_frame"
+        },
+        {
+          "type": "set_actor_property",
+          "target": "player",
+          "property": "bounds_center_position",
+          "value": [0, 0, 0]
+        },
+        {
+          "type": "set_view_mode",
+          "sceneMode": "3d",
+          "viewScale": 0.82,
+          "durationSeconds": 0.8,
+          "viewMode": {
+            "type": "perspective_3d",
+            "camera": {
+              "position": [3.7, 5.3, -2.5],
+              "target": [0, 0, 0],
+              "fovDegrees": 48
+            }
+          }
+        }
+      ]
+    },
+    "spawn_bloom_probes": {
+      "actions": [
+        {
+          "type": "spawn_actor",
+          "prefab": "emissive_probe",
+          "actorId": "probe_small_white",
+          "transform": {
+            "space": "battle.canonical",
+            "position": [-0.95, -0.65, -0.85],
+            "rotationDeg": [0, 0, 0],
+            "scale": [0.22, 0.22, 0.22]
+          }
+        },
+        {
+          "type": "set_actor_appearance_property",
+          "actorId": "probe_small_white",
+          "property": "image_tint",
+          "value": "#FFFFFFFF"
+        },
+        {
+          "type": "set_actor_appearance_property",
+          "actorId": "probe_small_white",
+          "property": "model",
+          "model": "soul",
+          "tint": "#FFFFFFFF"
+        },
+        {
+          "type": "spawn_actor",
+          "prefab": "emissive_probe",
+          "actorId": "probe_red",
+          "transform": {
+            "space": "battle.canonical",
+            "position": [-0.35, -0.35, -0.75],
+            "rotationDeg": [0, 0, 0],
+            "scale": [0.7, 0.7, 0.7]
+          }
+        },
+        {
+          "type": "set_actor_appearance_property",
+          "actorId": "probe_red",
+          "property": "image_tint",
+          "value": "#FF2020FF"
+        },
+        {
+          "type": "set_actor_appearance_property",
+          "actorId": "probe_red",
+          "property": "model",
+          "model": "soul",
+          "tint": "#FF2020FF"
+        },
+        {
+          "type": "spawn_actor",
+          "prefab": "emissive_probe",
+          "actorId": "probe_green",
+          "transform": {
+            "space": "battle.canonical",
+            "position": [0.35, -0.2, -0.75],
+            "rotationDeg": [0, 0, 0],
+            "scale": [0.7, 0.7, 0.7]
+          }
+        },
+        {
+          "type": "set_actor_appearance_property",
+          "actorId": "probe_green",
+          "property": "image_tint",
+          "value": "#20FF20FF"
+        },
+        {
+          "type": "set_actor_appearance_property",
+          "actorId": "probe_green",
+          "property": "model",
+          "model": "soul",
+          "tint": "#20FF20FF"
+        },
+        {
+          "type": "spawn_actor",
+          "prefab": "emissive_probe",
+          "actorId": "probe_blue",
+          "transform": {
+            "space": "battle.canonical",
+            "position": [0.95, -0.55, -0.85],
+            "rotationDeg": [0, 0, 0],
+            "scale": [0.7, 0.7, 0.7]
+          }
+        },
+        {
+          "type": "set_actor_appearance_property",
+          "actorId": "probe_blue",
+          "property": "image_tint",
+          "value": "#2020FFFF"
+        },
+        {
+          "type": "set_actor_appearance_property",
+          "actorId": "probe_blue",
+          "property": "model",
+          "model": "soul",
+          "tint": "#2020FFFF"
+        },
+        {
+          "type": "spawn_actor",
+          "prefab": "emissive_probe",
+          "actorId": "probe_large_dim",
+          "transform": {
+            "space": "battle.canonical",
+            "position": [-0.8, 0.1, 0.05],
+            "rotationDeg": [0, 0, 0],
+            "scale": [1.9, 1.9, 1.9]
+          }
+        },
+        {
+          "type": "set_actor_appearance_property",
+          "actorId": "probe_large_dim",
+          "property": "image_tint",
+          "value": "#404040FF"
+        },
+        {
+          "type": "set_actor_appearance_property",
+          "actorId": "probe_large_dim",
+          "property": "model",
+          "model": "soul",
+          "tint": "#404040FF"
+        },
+        {
+          "type": "spawn_actor",
+          "prefab": "emissive_probe",
+          "actorId": "probe_thin_white",
+          "transform": {
+            "space": "battle.canonical",
+            "position": [0, 0.15, 0.1],
+            "rotationDeg": [0, 0, 0],
+            "scale": [0.10, 1.9, 0.10]
+          }
+        },
+        {
+          "type": "set_actor_appearance_property",
+          "actorId": "probe_thin_white",
+          "property": "image_tint",
+          "value": "#FFFFFFFF"
+        },
+        {
+          "type": "set_actor_appearance_property",
+          "actorId": "probe_thin_white",
+          "property": "model",
+          "model": "soul",
+          "tint": "#FFFFFFFF"
+        },
+        {
+          "type": "spawn_actor",
+          "prefab": "emissive_probe",
+          "actorId": "probe_edge_white",
+          "transform": {
+            "space": "battle.canonical",
+            "position": [1.25, 0.55, 0.75],
+            "rotationDeg": [0, 0, 0],
+            "scale": [0.55, 0.55, 0.55]
+          }
+        },
+        {
+          "type": "set_actor_appearance_property",
+          "actorId": "probe_edge_white",
+          "property": "image_tint",
+          "value": "#FFFFFFFF"
+        },
+        {
+          "type": "set_actor_appearance_property",
+          "actorId": "probe_edge_white",
+          "property": "model",
+          "model": "soul",
+          "tint": "#FFFFFFFF"
+        }
+      ]
+    },
+    "spawn_occlusion_probes": {
+      "actions": [
+        {
+          "type": "spawn_actor",
+          "prefab": "emissive_probe",
+          "actorId": "probe_background_orange",
+          "transform": {
+            "space": "battle.canonical",
+            "position": [-0.45, 0.7, 0.75],
+            "rotationDeg": [0, 0, 0],
+            "scale": [1.4, 1.4, 1.4]
+          }
+        },
+        {
+          "type": "set_actor_appearance_property",
+          "actorId": "probe_background_orange",
+          "property": "image_tint",
+          "value": "#FF8040FF"
+        },
+        {
+          "type": "set_actor_appearance_property",
+          "actorId": "probe_background_orange",
+          "property": "model",
+          "model": "soul",
+          "tint": "#FF8040FF"
+        },
+        {
+          "type": "spawn_actor",
+          "prefab": "occluder",
+          "transform": {
+            "space": "battle.canonical",
+            "position": [-0.45, -0.15, 0.75],
+            "rotationDeg": [0, 20, 0],
+            "scale": [2.4, 2.4, 2.4]
+          }
+        },
+        {
+          "type": "spawn_actor",
+          "prefab": "emissive_probe",
+          "actorId": "probe_foreground_cyan",
+          "transform": {
+            "space": "battle.canonical",
+            "position": [0.55, -0.65, 0.65],
+            "rotationDeg": [0, 0, 0],
+            "scale": [1.2, 1.2, 1.2]
+          }
+        },
+        {
+          "type": "set_actor_appearance_property",
+          "actorId": "probe_foreground_cyan",
+          "property": "image_tint",
+          "value": "#40FFFFFF"
+        },
+        {
+          "type": "set_actor_appearance_property",
+          "actorId": "probe_foreground_cyan",
+          "property": "model",
+          "model": "soul",
+          "tint": "#40FFFFFF"
+        },
+        {
+          "type": "spawn_actor",
+          "prefab": "occluder",
+          "transform": {
+            "space": "battle.canonical",
+            "position": [0.55, 0.35, 0.65],
+            "rotationDeg": [0, -20, 0],
+            "scale": [2.0, 2.0, 2.0]
+          }
+        }
+      ]
+    }
+  },
+  "outcomes": {},
+  "phaseGraph": {
+    "entry": "post_blur_acceptance",
+    "phases": {
+      "post_blur_acceptance": {
+        "rulesets": ["acceptance_controls"],
+        "onEnter": [
+          {
+            "type": "call_pattern",
+            "id": "setup_scene"
+          },
+          {
+            "type": "call_pattern",
+            "id": "spawn_bloom_probes"
+          },
+          {
+            "type": "call_pattern",
+            "id": "spawn_occlusion_probes"
+          }
+        ]
+      }
+    }
+  },
+  "budgets": {
+    "maxActorSpawnsPerTick": 64,
+    "maxSignalDispatchPerTick": 256,
+    "maxLoopIterations": 512,
+    "maxRecursionDepth": 32,
+    "maxRuleStackDepth": 32,
+    "maxActionsPerStackPerTick": 256,
+    "maxActionsPerBattleTick": 1024,
+    "maxRenderRequestsPerTick": 64
+  },
+  "editorHints": {
+    "purpose": "battle_renderer_v2_post_blur_visual_acceptance"
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "placement": "top",
+  "portrait_mode": "no_portrait",
+  "body": {
+    "id": "root",
+    "type": "sequence",
+    "children": [
+      {
+        "id": "remember_meeting",
+        "type": "set",
+        "state": "minetale:met_flowey",
+        "value": true
+      },
+      {
+        "id": "greeting",
+        "type": "page",
+        "sound": {
+          "per_page": {"event": "minetale:dialogue.flowey_page_open", "source": "voice"},
+          "per_grapheme": [
+            {"event": "minetale:dialogue.flowey_voice", "source": "voice", "volume_multiplier": 0.8, "pitch_multiplier": {"min": 0.92, "max": 1.08}},
+            {"event": "minetale:dialogue.flowey_voice_alt", "source": "voice", "volume_multiplier": 0.8, "pitch_multiplier": {"min": 0.92, "max": 1.08}}
+          ]
+        },
+        "lines": [
+          {
+            "literal": "哈喽！"
+          },
+          {
+            "literal": "我是小花。"
+          }
+        ]
+      },
+      {
+        "id": "introduction",
+        "type": "page",
+        "sound": {
+          "per_page": {"event": "minetale:dialogue.flowey_page_open", "source": "voice"},
+          "per_grapheme": [
+            {"event": "minetale:dialogue.flowey_voice", "source": "voice", "volume_multiplier": 0.8, "pitch_multiplier": {"min": 0.92, "max": 1.08}},
+            {"event": "minetale:dialogue.flowey_voice_alt", "source": "voice", "volume_multiplier": 0.8, "pitch_multiplier": {"min": 0.92, "max": 1.08}}
+          ]
+        },
+        "advance": "auto",
+        "auto_delay_seconds": 1.5,
+        "lines": [
+          {
+            "literal": "地底世界的新朋友，一定有很多事情想知道吧。"
+          }
+        ]
+      },
+      {
+        "id": "open_debug_test_prompt",
+        "type": "run",
+        "package": "minetale:flowey/debug_test_prompt"
+      }
+    ]
+  }
+}

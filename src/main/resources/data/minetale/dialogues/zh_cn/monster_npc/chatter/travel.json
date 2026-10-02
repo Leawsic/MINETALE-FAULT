@@ -1,0 +1,13 @@
+{
+  "placement": "bottom",
+  "portrait_mode": "no_portrait",
+  "body": {
+    "id": "root",
+    "type": "page",
+    "lines": [
+      {
+        "literal": "有些好地方可不在大路边上。"
+      }
+    ]
+  }
+}

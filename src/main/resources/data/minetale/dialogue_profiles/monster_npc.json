@@ -1,0 +1,18 @@
+{
+  "rules": [
+    {
+      "when": [
+        {
+          "state": "minetale:snowtown_resident_talk_count",
+          "op": "eq",
+          "value": 0
+        }
+      ],
+      "run": "minetale:monster_npc/first_meeting"
+    },
+    {
+      "when": [],
+      "run": "minetale:monster_npc/chatter"
+    }
+  ]
+}

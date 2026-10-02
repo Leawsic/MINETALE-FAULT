@@ -1,0 +1,23 @@
+{
+  "template": "minetale:snowtown/stubbs_medieval/0068_legacy_nordic_practice_range",
+  "role": "building",
+  "category": "minecraft:building",
+  "weight": 1,
+  "tags": [
+    "minecraft:building"
+  ],
+  "footprint": {
+    "width": 12,
+    "height": 8,
+    "depth": 20,
+    "foundation_depth": 0,
+    "max_slope": 0,
+    "allow_liquid": false,
+    "require_surface": false
+  },
+  "placement": {
+    "can_rotate": true,
+    "can_mirror": false
+  },
+  "scan_markers": true
+}

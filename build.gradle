@@ -1,0 +1,129 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'net.neoforged.gradle.userdev' version '7.1.38'
+}
+
+tasks.named('wrapper', Wrapper).configure {
+    distributionType = Wrapper.DistributionType.BIN
+}
+
+version = mod_version
+group = mod_group_id
+
+repositories {
+    mavenCentral()
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = 'GeckoLib'
+                url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
+            }
+        }
+        filter {
+            includeGroup('software.bernie.geckolib')
+        }
+    }
+}
+
+base {
+    archivesName = mod_id
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+runs {
+    configureEach {
+        systemProperty 'forge.logging.markers', 'REGISTRIES'
+        systemProperty 'forge.logging.console.level', 'debug'
+        modSource project.sourceSets.main
+    }
+
+    client {
+    }
+
+    server {
+        argument '--nogui'
+    }
+
+    clientData {
+        arguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+    }
+}
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+dependencies {
+    implementation "net.neoforged:neoforge:${neo_version}"
+    implementation "software.bernie.geckolib:geckolib-neoforge-${minecraft_version}:${geckolib_version}"
+    // 场景编解码依赖随模组发布；纯 Java 实现覆盖所有客户端平台。
+    jarJar(implementation('org.tukaani:xz:1.12'))
+    ['imageio-webp', 'imageio-core', 'imageio-metadata'].each {
+        jarJar(implementation("com.twelvemonkeys.imageio:${it}:3.13.1"))
+    }
+    ['common-lang', 'common-io', 'common-image'].each {
+        jarJar(implementation("com.twelvemonkeys.common:${it}:3.13.1"))
+    }
+}
+
+// 内部类归档使用 zip，避免被部署工具当作 Mod；直接执行 jar 也会完成依赖打包。
+tasks.named('jar', Jar) {
+    archiveClassifier = 'classes'
+    archiveExtension = 'zip'
+    destinationDirectory = layout.buildDirectory.dir('intermediates/thinJar')
+    finalizedBy 'jarJar'
+}
+tasks.named('jarJar') {
+    archiveClassifier = ''
+}
+// Maven 发布与 Gradle variant 元数据共同引用完整包，避免 publish 再次发布中间归档。
+['apiElements', 'runtimeElements'].each { name ->
+    configurations.named(name) {
+        outgoing.artifacts.clear()
+        outgoing.artifact(tasks.named('jarJar'))
+    }
+}
+
+tasks.withType(ProcessResources).configureEach {
+    var replaceProperties = [
+            minecraft_version      : minecraft_version,
+            minecraft_version_range: minecraft_version_range,
+            neo_version            : neo_version,
+            mod_id                 : mod_id,
+            mod_name               : mod_name,
+            mod_license            : mod_license,
+            mod_version            : mod_version,
+            mod_authors            : mod_authors,
+            mod_description        : mod_description,
+            geckolib_version       : geckolib_version,
+    ]
+    inputs.properties replaceProperties
+
+    filesMatching(['META-INF/neoforge.mods.toml']) {
+        expand replaceProperties
+    }
+}
+
+// 发布到项目内的本地 Maven 仓库。
+publishing {
+    publications {
+        register('mavenJava', MavenPublication) {
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            url = layout.projectDirectory.dir('repo')
+        }
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+idea {
+    module {
+        downloadSources = true
+        downloadJavadoc = true
+    }
+}

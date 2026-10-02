@@ -1,0 +1,65 @@
+{
+  "placement": "top",
+  "portrait_mode": "no_portrait",
+  "body": {
+    "id": "root",
+    "type": "sequence",
+    "children": [
+      {
+        "id": "ask_test",
+        "type": "page",
+        "sound": {
+          "per_page": {
+            "event": "minetale:dialogue.flowey_page_open",
+            "source": "voice"
+          },
+          "per_grapheme": [
+            {
+              "event": "minetale:dialogue.flowey_voice",
+              "source": "voice",
+              "volume_multiplier": 0.8,
+              "pitch_multiplier": {"min": 0.92, "max": 1.08}
+            },
+            {
+              "event": "minetale:dialogue.flowey_voice_alt",
+              "source": "voice",
+              "volume_multiplier": 0.8,
+              "pitch_multiplier": {"min": 0.92, "max": 1.08}
+            }
+          ]
+        },
+        "lines": [
+          {
+            "literal": "Which test would you like to run?"
+          }
+        ]
+      },
+      {
+        "id": "choose_test",
+        "type": "choice",
+        "options": [
+          {
+            "id": "battle_test",
+            "literal": "Battle test",
+            "results": [
+              {
+                "when": [],
+                "run": "minetale:flowey/debug_start_battle"
+              }
+            ]
+          },
+          {
+            "id": "lighting_test",
+            "literal": "Lighting test",
+            "results": [
+              {
+                "when": [],
+                "run": "minetale:flowey/debug_start_lighting"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

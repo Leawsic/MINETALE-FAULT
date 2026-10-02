@@ -1,0 +1,23 @@
+{
+  "template": "minetale:snowtown/stubbs_medieval/0013_legacy_bakery_1",
+  "role": "building",
+  "category": "minecraft:building",
+  "weight": 1,
+  "tags": [
+    "minecraft:building"
+  ],
+  "footprint": {
+    "width": 25,
+    "height": 19,
+    "depth": 18,
+    "foundation_depth": 0,
+    "max_slope": 0,
+    "allow_liquid": false,
+    "require_surface": false
+  },
+  "placement": {
+    "can_rotate": true,
+    "can_mirror": false
+  },
+  "scan_markers": true
+}

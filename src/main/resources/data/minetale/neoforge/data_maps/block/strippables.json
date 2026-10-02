@@ -1,0 +1,10 @@
+{
+  "values": {
+    "minetale:snowtown_spruce_log": {
+      "stripped_block": "minetale:stripped_snowtown_spruce_log"
+    },
+    "minetale:snowtown_spruce_wood": {
+      "stripped_block": "minetale:stripped_snowtown_spruce_wood"
+    }
+  }
+}

@@ -1,0 +1,142 @@
+{
+  "variants": {
+    "facing=down,visual=anchor": {
+      "model": "minetale:block/template_marker_anchor",
+      "x": 90
+    },
+    "facing=down,visual=connector": {
+      "model": "minetale:block/template_marker_connector",
+      "x": 90
+    },
+    "facing=down,visual=hidden": {
+      "model": "minetale:block/template_marker_hidden",
+      "x": 90
+    },
+    "facing=down,visual=lot": {
+      "model": "minetale:block/template_marker_lot",
+      "x": 90
+    },
+    "facing=down,visual=point": {
+      "model": "minetale:block/template_marker_point",
+      "x": 90
+    },
+    "facing=down,visual=volume": {
+      "model": "minetale:block/template_marker_volume",
+      "x": 90
+    },
+    "facing=east,visual=anchor": {
+      "model": "minetale:block/template_marker_anchor",
+      "y": 90
+    },
+    "facing=east,visual=connector": {
+      "model": "minetale:block/template_marker_connector",
+      "y": 90
+    },
+    "facing=east,visual=hidden": {
+      "model": "minetale:block/template_marker_hidden",
+      "y": 90
+    },
+    "facing=east,visual=lot": {
+      "model": "minetale:block/template_marker_lot",
+      "y": 90
+    },
+    "facing=east,visual=point": {
+      "model": "minetale:block/template_marker_point",
+      "y": 90
+    },
+    "facing=east,visual=volume": {
+      "model": "minetale:block/template_marker_volume",
+      "y": 90
+    },
+    "facing=north,visual=anchor": {
+      "model": "minetale:block/template_marker_anchor"
+    },
+    "facing=north,visual=connector": {
+      "model": "minetale:block/template_marker_connector"
+    },
+    "facing=north,visual=hidden": {
+      "model": "minetale:block/template_marker_hidden"
+    },
+    "facing=north,visual=lot": {
+      "model": "minetale:block/template_marker_lot"
+    },
+    "facing=north,visual=point": {
+      "model": "minetale:block/template_marker_point"
+    },
+    "facing=north,visual=volume": {
+      "model": "minetale:block/template_marker_volume"
+    },
+    "facing=south,visual=anchor": {
+      "model": "minetale:block/template_marker_anchor",
+      "y": 180
+    },
+    "facing=south,visual=connector": {
+      "model": "minetale:block/template_marker_connector",
+      "y": 180
+    },
+    "facing=south,visual=hidden": {
+      "model": "minetale:block/template_marker_hidden",
+      "y": 180
+    },
+    "facing=south,visual=lot": {
+      "model": "minetale:block/template_marker_lot",
+      "y": 180
+    },
+    "facing=south,visual=point": {
+      "model": "minetale:block/template_marker_point",
+      "y": 180
+    },
+    "facing=south,visual=volume": {
+      "model": "minetale:block/template_marker_volume",
+      "y": 180
+    },
+    "facing=up,visual=anchor": {
+      "model": "minetale:block/template_marker_anchor",
+      "x": 270
+    },
+    "facing=up,visual=connector": {
+      "model": "minetale:block/template_marker_connector",
+      "x": 270
+    },
+    "facing=up,visual=hidden": {
+      "model": "minetale:block/template_marker_hidden",
+      "x": 270
+    },
+    "facing=up,visual=lot": {
+      "model": "minetale:block/template_marker_lot",
+      "x": 270
+    },
+    "facing=up,visual=point": {
+      "model": "minetale:block/template_marker_point",
+      "x": 270
+    },
+    "facing=up,visual=volume": {
+      "model": "minetale:block/template_marker_volume",
+      "x": 270
+    },
+    "facing=west,visual=anchor": {
+      "model": "minetale:block/template_marker_anchor",
+      "y": 270
+    },
+    "facing=west,visual=connector": {
+      "model": "minetale:block/template_marker_connector",
+      "y": 270
+    },
+    "facing=west,visual=hidden": {
+      "model": "minetale:block/template_marker_hidden",
+      "y": 270
+    },
+    "facing=west,visual=lot": {
+      "model": "minetale:block/template_marker_lot",
+      "y": 270
+    },
+    "facing=west,visual=point": {
+      "model": "minetale:block/template_marker_point",
+      "y": 270
+    },
+    "facing=west,visual=volume": {
+      "model": "minetale:block/template_marker_volume",
+      "y": 270
+    }
+  }
+}

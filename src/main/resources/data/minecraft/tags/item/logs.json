@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "minetale:snowtown_spruce_log",
+    "minetale:snowtown_spruce_wood",
+    "minetale:stripped_snowtown_spruce_log",
+    "minetale:stripped_snowtown_spruce_wood"
+  ]
+}

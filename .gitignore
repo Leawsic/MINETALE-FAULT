@@ -1,0 +1,12 @@
+# IDE 本机配置
+/.idea/
+
+# Gradle 缓存与构建产物
+/.gradle/
+/build/
+
+# 本地运行目录
+/runs/
+
+# 本地归档与验证材料
+/local/

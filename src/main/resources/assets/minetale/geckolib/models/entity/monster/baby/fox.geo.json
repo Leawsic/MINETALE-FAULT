@@ -1,0 +1,81 @@
+{
+	"format_version": "1.12.0",
+	"minecraft:geometry": [
+		{
+			"description": {
+				"identifier": "geometry.fox_baby",
+				"texture_width": 32,
+				"texture_height": 32,
+				"visible_bounds_width": 3,
+				"visible_bounds_height": 2.5,
+				"visible_bounds_offset": [0, 0.75, 0]
+			},
+			"bones": [
+				{
+					"name": "root",
+					"pivot": [0, 0, 0]
+				},
+				{
+					"name": "torso",
+					"parent": "root",
+					"pivot": [0, 2, 0],
+					"cubes": [
+						{"origin": [-2.5, 3, -3], "size": [5, 4, 6], "pivot": [0, 5, 0], "rotation": [-90, 0, 0], "uv": [0, 10]}
+					]
+				},
+				{
+					"name": "head",
+					"parent": "torso",
+					"pivot": [0, 8, -1.4],
+					"cubes": [
+						{"origin": [-3, 7, -2.9], "size": [6, 5, 5], "uv": [0, 0]},
+						{"origin": [-1, 7, -4.9], "size": [2, 2, 2], "uv": [18, 20]},
+						{"origin": [-3, 12, -1.9], "size": [2, 2, 1], "uv": [22, 8]},
+						{"origin": [1, 12, -1.9], "size": [2, 2, 1], "uv": [22, 11]}
+					]
+				},
+				{
+					"name": "left_arm",
+					"parent": "torso",
+					"pivot": [3.5, 8, 0],
+					"cubes": [
+						{"origin": [2.5, 6, -1], "size": [2, 2, 2], "uv": [22, 0]}
+					]
+				},
+				{
+					"name": "right_arm",
+					"parent": "torso",
+					"pivot": [-3.5, 8, 0],
+					"cubes": [
+						{"origin": [-4.5, 6, -1], "size": [2, 2, 2], "uv": [22, 4]}
+					]
+				},
+				{
+					"name": "tail",
+					"parent": "torso",
+					"pivot": [0, 4.1, 2],
+					"rotation": [-10, 0, 0],
+					"cubes": [
+						{"origin": [-1.5, 2.6, 2], "size": [3, 3, 6], "uv": [0, 20]}
+					]
+				},
+				{
+					"name": "left_leg",
+					"parent": "root",
+					"pivot": [1.4, 3, 0],
+					"cubes": [
+						{"origin": [0.4, 0, -1], "size": [2, 2, 2], "uv": [22, 0]}
+					]
+				},
+				{
+					"name": "right_leg",
+					"parent": "root",
+					"pivot": [-1.4, 3, 0],
+					"cubes": [
+						{"origin": [-2.4, 0, -1], "size": [2, 2, 2], "uv": [22, 4]}
+					]
+				}
+			]
+		}
+	]
+}

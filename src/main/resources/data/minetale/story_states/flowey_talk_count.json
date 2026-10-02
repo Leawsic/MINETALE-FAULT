@@ -1,0 +1,6 @@
+{
+  "scope": "player",
+  "type": "int",
+  "default": 0,
+  "min": 0
+}

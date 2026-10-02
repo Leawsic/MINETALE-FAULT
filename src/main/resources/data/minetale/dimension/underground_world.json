@@ -1,0 +1,22 @@
+{
+  "type": "minetale:underground_type",
+  "generator": {
+    "type": "minetale:underground_noise",
+    "settings": "minetale:underground",
+    "biome_source": {
+      "type": "minetale:underground_network",
+
+      "ruins": "minetale:ruins",
+      "snowdin": "minetale:snowdin",
+      "waterfall": "minetale:waterfall",
+      "hot_land": "minetale:hot_land",
+      "deep_tunnel": "minetale:deep_tunnel",
+      "deep_caves": "minetale:deep_caves",
+      "origin": "minetale:origin_region",
+
+      "cell_size": 48,
+      "room_base_radius": 20.0,
+      "tunnel_base_radius": 2.6
+    }
+  }
+}

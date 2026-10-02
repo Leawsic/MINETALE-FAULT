@@ -1,0 +1,70 @@
+{
+	"format_version": "1.12.0",
+	"minecraft:geometry": [
+		{
+			"description": {
+				"identifier": "geometry.pig_baby",
+				"texture_width": 32,
+				"texture_height": 32,
+				"visible_bounds_width": 2,
+				"visible_bounds_height": 2.5,
+				"visible_bounds_offset": [0, 0.75, 0]
+			},
+			"bones": [
+				{
+					"name": "root",
+					"pivot": [0, 0, 0]
+				},
+				{
+					"name": "torso",
+					"parent": "root",
+					"pivot": [0, 2, 0],
+					"cubes": [
+						{"origin": [-3.5, 3.5, -4.5], "size": [7, 6, 9], "pivot": [0, 6.5, 0], "rotation": [-90, 0, 0], "uv": [0, 0]}
+					]
+				},
+				{
+					"name": "head",
+					"parent": "torso",
+					"pivot": [0, 11, -2.1],
+					"cubes": [
+						{"origin": [-3.5, 10, -4.6], "size": [7, 6, 6], "inflate": 0.025, "uv": [0, 15]},
+						{"origin": [-1.5, 10.975, -5.6], "size": [3, 2, 1], "inflate": 0.015, "uv": [6, 27]}
+					]
+				},
+				{
+					"name": "left_arm",
+					"parent": "torso",
+					"pivot": [4.5, 11, 0],
+					"cubes": [
+						{"origin": [3.5, 9, -1], "size": [2, 2, 2], "uv": [0, 0]}
+					]
+				},
+				{
+					"name": "right_arm",
+					"parent": "torso",
+					"pivot": [-4.5, 11, 0],
+					"cubes": [
+						{"origin": [-5.5, 9, -1], "size": [2, 2, 2], "uv": [23, 0]}
+					]
+				},
+				{
+					"name": "left_leg",
+					"parent": "root",
+					"pivot": [1.96, 3, 0],
+					"cubes": [
+						{"origin": [0.96, 0, -1], "size": [2, 2, 2], "uv": [0, 4]}
+					]
+				},
+				{
+					"name": "right_leg",
+					"parent": "root",
+					"pivot": [-1.96, 3, 0],
+					"cubes": [
+						{"origin": [-2.96, 0, -1], "size": [2, 2, 2], "uv": [23, 4]}
+					]
+				}
+			]
+		}
+	]
+}

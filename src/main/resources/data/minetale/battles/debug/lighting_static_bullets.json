@@ -1,0 +1,236 @@
+{
+  "schemaVersion": 1,
+  "id": "minetale:debug/lighting_static_bullets",
+  "metadata": {
+    "displayName": "Battle Renderer V2 Static Bullet Lighting Test",
+    "description": "复用光照测试的战斗框与 3D 相机，在三个深度层中永久放置 48 个大小各异的静态 bullet1 Actor，用于快速观察体积光、遮挡与阴影随参数变化的效果。"
+  },
+  "variables": {},
+  "imports": {
+    "actorPrefabs": [],
+    "rulesets": [],
+    "patterns": [],
+    "outcomes": []
+  },
+  "events": {},
+  "actors": {
+    "battle_frame": {
+      "type": "scripted_actor",
+      "kind": "minetale:frame",
+      "role": "hybrid",
+      "transform": {
+        "space": "battle.canonical",
+        "position": [0, 0, 0],
+        "rotationDeg": [0, 0, 0],
+        "scale": [1.15, 1.15, 1]
+      },
+      "visual": {
+        "type": "frame",
+        "mode": "dual",
+        "visible": true,
+        "rendered": {
+          "enabled": true,
+          "castsShadow": false,
+          "receivesShadow": true
+        },
+        "frame": {
+          "worldSize": [2, 2, 2],
+          "thickness": 0.045,
+          "borderColor": "#FFFFFFFF"
+        }
+      },
+      "collision": {
+        "shape": "box",
+        "space": "battle.canonical",
+        "halfSize": [1, 1, 1]
+      },
+      "tags": ["battle_frame", "primary_frame", "active_arena"],
+      "vars": {},
+      "components": [],
+      "events": {}
+    },
+    "static_bullet": {
+      "id": "minetale:actor/basic_bullet",
+      "type": "scripted_actor",
+      "kind": "minetale:lighting_static_bullet",
+      "role": "presentation",
+      "transform": {
+        "space": "battle.canonical",
+        "position": [0, 0, 0],
+        "rotationDeg": [0, 0, 0],
+        "scale": [1, 1, 1]
+      },
+      "visual": {
+        "type": "image_model",
+        "mode": "dual",
+        "visible": true,
+        "rendered": {
+          "enabled": true,
+          "castsShadow": true,
+          "receivesShadow": true
+        },
+        "image": {
+          "texture": "minetale:textures/gui/battle/bullet1.png",
+          "source": [0, 0, 7, 7],
+          "textureSize": [7, 7],
+          "tint": "#FFFFFFFF",
+          "fit": "contain",
+          "aspect": "source"
+        },
+        "model": {
+          "id": "bullet1",
+          "tint": "#FFFFFFFF",
+          "scale": [0.125, 0.125, 0.125]
+        }
+      },
+      "collision": {
+        "shape": "none"
+      },
+      "tags": ["lighting_probe", "static_bullet_field"],
+      "vars": {},
+      "components": [],
+      "events": {}
+    }
+  },
+  "rulesets": {
+    "static_scene_controls": {
+      "rules": [
+        {
+          "domain": "player_control",
+          "controller": {
+            "type": "red_free",
+            "moveSpeedPerSecond": 1.55,
+            "allowVertical": true,
+            "clampToBattleBox": true
+          }
+        },
+        {
+          "domain": "damage",
+          "invincibleSeconds": 0.65
+        }
+      ]
+    }
+  },
+  "patterns": {
+    "noop": {
+      "id": "minetale:pattern/noop",
+      "actions": []
+    },
+    "setup_lighting_scene": {
+      "actions": [
+        {
+          "type": "spawn_actor",
+          "prefab": "battle_frame",
+          "actorId": "battle_frame"
+        },
+        {
+          "type": "set_actor_property",
+          "target": "player",
+          "property": "bounds_center_position",
+          "value": [0, -0.9, 0]
+        },
+        {
+          "type": "set_view_mode",
+          "sceneMode": "3d",
+          "viewScale": 0.82,
+          "durationSeconds": 0.8,
+          "viewMode": {
+            "type": "perspective_3d",
+            "camera": {
+              "position": [3.7, 5.3, -2.5],
+              "target": [0, 0, 0],
+              "fovDegrees": 48
+            }
+          }
+        }
+      ]
+    },
+    "spawn_static_bullet_field": {
+      "actions": [
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[-0.82,-0.78,-0.72],"rotationDeg":[0,15,0],"scale":[0.55,0.55,0.55]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[-0.28,-0.78,-0.72],"rotationDeg":[20,0,15],"scale":[1.05,1.05,1.05]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[0.28,-0.78,-0.72],"rotationDeg":[0,30,20],"scale":[1.7,1.7,1.7]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[0.82,-0.78,-0.72],"rotationDeg":[25,25,0],"scale":[2.5,2.5,2.5]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[-0.82,-0.26,-0.72],"rotationDeg":[10,35,0],"scale":[1.35,1.35,1.35]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[-0.28,-0.26,-0.72],"rotationDeg":[30,10,25],"scale":[2.8,2.8,2.8]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[0.28,-0.26,-0.72],"rotationDeg":[0,45,10],"scale":[0.7,0.7,0.7]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[0.82,-0.26,-0.72],"rotationDeg":[15,20,35],"scale":[1.8,1.8,1.8]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[-0.82,0.26,-0.72],"rotationDeg":[35,0,20],"scale":[2.15,2.15,2.15]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[-0.28,0.26,-0.72],"rotationDeg":[0,25,35],"scale":[0.45,0.45,0.45]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[0.28,0.26,-0.72],"rotationDeg":[20,40,0],"scale":[1.25,1.25,1.25]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[0.82,0.26,-0.72],"rotationDeg":[40,15,25],"scale":[2.35,2.35,2.35]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[-0.82,0.78,-0.72],"rotationDeg":[10,10,40],"scale":[0.85,0.85,0.85]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[-0.28,0.78,-0.72],"rotationDeg":[25,45,10],"scale":[1.55,1.55,1.55]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[0.28,0.78,-0.72],"rotationDeg":[45,20,30],"scale":[2.65,2.65,2.65]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[0.82,0.78,-0.72],"rotationDeg":[0,35,45],"scale":[0.6,0.6,0.6]}},
+
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[-0.7,-0.7,0],"rotationDeg":[15,5,25],"scale":[1.9,1.9,1.9]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[-0.23,-0.7,0],"rotationDeg":[35,20,0],"scale":[0.65,0.65,0.65]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[0.23,-0.7,0],"rotationDeg":[5,40,20],"scale":[2.4,2.4,2.4]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[0.7,-0.7,0],"rotationDeg":[25,10,40],"scale":[1.15,1.15,1.15]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[-0.7,-0.23,0],"rotationDeg":[40,30,5],"scale":[0.4,0.4,0.4]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[-0.23,-0.23,0],"rotationDeg":[10,45,30],"scale":[1.5,1.5,1.5]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[0.23,-0.23,0],"rotationDeg":[30,5,45],"scale":[2.75,2.75,2.75]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[0.7,-0.23,0],"rotationDeg":[0,25,15],"scale":[0.9,0.9,0.9]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[-0.7,0.23,0],"rotationDeg":[20,35,10],"scale":[2.2,2.2,2.2]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[-0.23,0.23,0],"rotationDeg":[45,10,20],"scale":[1.3,1.3,1.3]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[0.23,0.23,0],"rotationDeg":[10,20,40],"scale":[0.5,0.5,0.5]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[0.7,0.23,0],"rotationDeg":[30,45,5],"scale":[2.55,2.55,2.55]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[-0.7,0.7,0],"rotationDeg":[5,15,35],"scale":[1.65,1.65,1.65]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[-0.23,0.7,0],"rotationDeg":[25,35,15],"scale":[0.75,0.75,0.75]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[0.23,0.7,0],"rotationDeg":[40,5,30],"scale":[2.05,2.05,2.05]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[0.7,0.7,0],"rotationDeg":[15,30,45],"scale":[1,1,1]}},
+
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[-0.82,-0.78,0.72],"rotationDeg":[30,20,10],"scale":[2.7,2.7,2.7]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[-0.28,-0.78,0.72],"rotationDeg":[5,35,25],"scale":[0.8,0.8,0.8]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[0.28,-0.78,0.72],"rotationDeg":[20,10,45],"scale":[1.45,1.45,1.45]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[0.82,-0.78,0.72],"rotationDeg":[45,30,5],"scale":[0.5,0.5,0.5]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[-0.82,-0.26,0.72],"rotationDeg":[10,40,20],"scale":[1.75,1.75,1.75]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[-0.28,-0.26,0.72],"rotationDeg":[35,15,30],"scale":[1.1,1.1,1.1]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[0.28,-0.26,0.72],"rotationDeg":[15,45,0],"scale":[2.45,2.45,2.45]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[0.82,-0.26,0.72],"rotationDeg":[25,5,35],"scale":[0.65,0.65,0.65]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[-0.82,0.26,0.72],"rotationDeg":[40,25,15],"scale":[1.4,1.4,1.4]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[-0.28,0.26,0.72],"rotationDeg":[0,30,40],"scale":[2.25,2.25,2.25]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[0.28,0.26,0.72],"rotationDeg":[20,0,25],"scale":[0.95,0.95,0.95]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[0.82,0.26,0.72],"rotationDeg":[30,40,10],"scale":[2.85,2.85,2.85]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[-0.82,0.78,0.72],"rotationDeg":[15,20,35],"scale":[0.55,0.55,0.55]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[-0.28,0.78,0.72],"rotationDeg":[45,5,20],"scale":[1.85,1.85,1.85]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[0.28,0.78,0.72],"rotationDeg":[5,45,30],"scale":[1.2,1.2,1.2]}},
+        {"type":"spawn_actor","prefab":"static_bullet","transform":{"space":"battle.canonical","position":[0.82,0.78,0.72],"rotationDeg":[35,25,45],"scale":[2.6,2.6,2.6]}}
+      ]
+    }
+  },
+  "outcomes": {},
+  "phaseGraph": {
+    "entry": "static_bullet_lighting_test",
+    "phases": {
+      "static_bullet_lighting_test": {
+        "rulesets": ["static_scene_controls"],
+        "onEnter": [
+          {
+            "type": "call_pattern",
+            "id": "setup_lighting_scene"
+          },
+          {
+            "type": "call_pattern",
+            "id": "spawn_static_bullet_field"
+          }
+        ]
+      }
+    }
+  },
+  "budgets": {
+    "maxActorSpawnsPerTick": 128,
+    "maxSignalDispatchPerTick": 512,
+    "maxLoopIterations": 1024,
+    "maxRecursionDepth": 64,
+    "maxRuleStackDepth": 64,
+    "maxActionsPerStackPerTick": 512,
+    "maxActionsPerBattleTick": 2048,
+    "maxRenderRequestsPerTick": 64
+  },
+  "editorHints": {
+    "purpose": "battle_renderer_v2_static_bullet_volumetric_lighting_test",
+    "referenceLayout": "debug/lighting_cycle_test.json 3D lighting layout"
+  }
+}

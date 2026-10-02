@@ -1,0 +1,20 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "minetale:block/geo_rock"
+      },
+      {
+        "model": "minetale:block/geo_rock_mirrored"
+      },
+      {
+        "model": "minetale:block/geo_rock",
+        "y": 180
+      },
+      {
+        "model": "minetale:block/geo_rock_mirrored",
+        "y": 180
+      }
+    ]
+  }
+}

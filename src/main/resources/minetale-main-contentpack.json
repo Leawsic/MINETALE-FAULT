@@ -1,0 +1,13 @@
+{
+  "format": "minetale-main-export-catalog",
+  "formatVersion": 1,
+  "version": "1.0.0",
+  "exports": [
+    {"resourceId":"minetale:actor/basic_bullet","type":"actor_prefab","displayName":"基础 Bullet Actor","replacement":"replaceable"},
+    {"resourceId":"minetale:pattern/noop","type":"pattern","displayName":"空 Pattern","replacement":"replaceable"},
+    {"resourceId":"minetale:debug/default","type":"battle","displayName":"基础四选项回合制原型","replacement":"sealed"},
+    {"resourceId":"minetale:flowey/first_meeting","type":"dialogue","displayName":"Flowey 初次见面对话","replacement":"sealed"},
+    {"resourceId":"minetale:met_flowey","type":"story_state","displayName":"是否见过 Flowey","replacement":"sealed","stateAccess":"read_write"},
+    {"resourceId":"minetale:flowey_talk_count","type":"story_state","displayName":"Flowey 对话次数","replacement":"sealed","stateAccess":"read_write"}
+  ]
+}

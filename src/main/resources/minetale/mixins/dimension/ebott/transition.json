@@ -1,0 +1,26 @@
+{
+  "minVersion": "0.8",
+  "required": true,
+  "package": "cn.jehorstudio.minetale.dimension.ebott.transition.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "server.ServerTransitionBarrierCollisionMixin"
+  ],
+  "client": [
+    "client.collision.ClientTransitionBarrierCollisionMixin",
+    "client.network.PreparedTargetPacketListenerMixin",
+    "client.render.PreparedTargetMeshMixin",
+    "client.render.TargetCameraAccessor",
+    "client.render.TargetLightmapMixin",
+    "client.staging.MinecraftRendererAccessor",
+    "client.staging.PreparedLevelRendererAccessor",
+    "client.staging.PreparedLevelRendererMixin",
+    "client.staging.PreparedSectionBufferPoolAccessor",
+    "client.staging.PreparedSectionCompileTaskAccessor",
+    "client.staging.PreparedSectionDispatcherAccessor",
+    "client.staging.PreparedViewAreaAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

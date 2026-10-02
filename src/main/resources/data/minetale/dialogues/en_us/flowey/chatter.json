@@ -1,0 +1,24 @@
+{
+  "placement": "bottom",
+  "portrait_mode": "no_portrait",
+  "body": {
+    "id": "root",
+    "type": "sequence",
+    "children": [
+      {
+        "id": "count_talk",
+        "type": "add",
+        "state": "minetale:flowey_talk_count",
+        "value": 1
+      },
+      {
+        "id": "choose_chatter",
+        "type": "shuffle_cycle",
+        "packages": [
+          "minetale:flowey/chatter/room",
+          "minetale:flowey/chatter/silence"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "placement": "bottom",
+  "portrait_mode": "no_portrait",
+  "body": {
+    "id": "root",
+    "type": "page",
+    "sound": {
+      "per_page": {"event": "minetale:dialogue.flowey_page_open", "source": "voice"},
+      "per_grapheme": [
+        {"event": "minetale:dialogue.flowey_voice", "source": "voice", "volume_multiplier": 0.8, "pitch_multiplier": {"min": 0.92, "max": 1.08}},
+        {"event": "minetale:dialogue.flowey_voice_alt", "source": "voice", "volume_multiplier": 0.8, "pitch_multiplier": {"min": 0.92, "max": 1.08}}
+      ]
+    },
+    "reveal": "unskippable",
+    "lines": [
+      {
+        "literal": "Sometimes silence is an answer, too."
+      }
+    ]
+  }
+}

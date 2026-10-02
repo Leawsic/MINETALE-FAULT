@@ -1,0 +1,2741 @@
+{
+  "schemaVersion": 1,
+  "metadata": {
+    "displayName": "Battle Turn Cycle World-Plane Prototype",
+    "description": "玩家回合→2D敌方回合→玩家回合→3D敌方回合循环。开场由独立 Soul 模型 Actor 在冻结世界画面上定格、闪烁并连续平移，同时渐显环境背景；背景完全显现后，以环境纹理作为前景遮挡，在遮挡下装载战斗界面并交接真实 Soul，再渐隐遮挡。沿用原回合原型，并使用已修复的正式 Spawn Transform/Velocity Override。小花角色图、战斗框与底部四个选项不再使用 viewport layout，而是共享 battle.canonical 空间；标准 2D 视角下保持原有构图，沿深度轴形成“选项前置、战斗框居中、小花后置”的三层关系，切换至 3D 时可看到它们的世界空间关系。"
+  },
+  "variables": {
+    "turn_count": {
+      "type": "int",
+      "initial": 0
+    },
+    "menu_selection": {
+      "type": "int",
+      "initial": 0
+    },
+    "menu_level": {
+      "type": "int",
+      "initial": 0
+    },
+    "submenu_selection": {
+      "type": "int",
+      "initial": 0
+    },
+    "menu_active": {
+      "type": "boolean",
+      "initial": false
+    },
+    "next_enemy_phase": {
+      "type": "int",
+      "initial": 0
+    }
+  },
+  "imports": {
+    "actorPrefabs": [],
+    "rulesets": [],
+    "patterns": [],
+    "outcomes": []
+  },
+  "events": {
+    "onKeyPressed": {
+      "key.left": [
+        {"type": "call_pattern", "id": "menu_previous"}
+      ],
+      "key.right": [
+        {"type": "call_pattern", "id": "menu_next"}
+      ],
+      "key.forward": [
+        {"type": "call_pattern", "id": "submenu_previous"}
+      ],
+      "key.back": [
+        {"type": "call_pattern", "id": "submenu_next"}
+      ],
+      "key.minetale.confirm": [
+        {"type": "call_pattern", "id": "menu_confirm"}
+      ],
+      "key.minetale.skip": [
+        {"type": "call_pattern", "id": "menu_cancel"}
+      ]
+    }
+  },
+  "actors": {
+    "opening_frame_suppressor": {
+      "type": "scripted_actor",
+      "kind": "minetale:opening_frame_suppressor",
+      "role": "presentation",
+      "transform": {
+        "space": "battle.canonical",
+        "position": [0, 0, 0],
+        "rotationDeg": [0, 0, 0],
+        "scale": [1, 1, 1]
+      },
+      "visual": {
+        "type": "frame",
+        "mode": "dual",
+        "visible": false,
+        "rendered": {
+          "enabled": false,
+          "castsShadow": false,
+          "receivesShadow": false
+        },
+        "frame": {
+          "worldSize": [2, 2, 2],
+          "thickness": 0.045,
+          "borderColor": "#00FFFFFF"
+        }
+      },
+      "collision": {
+        "shape": "none"
+      },
+      "tags": [
+        "opening",
+        "primary_frame"
+      ],
+      "vars": {},
+      "components": [],
+      "events": {}
+    },
+    "opening_soul": {
+      "type": "scripted_actor",
+      "kind": "minetale:opening_soul",
+      "role": "presentation",
+      "transform": {
+        "space": "battle.canonical",
+        "position": [
+          0,
+          1.2,
+          0.08
+        ],
+        "rotationDeg": [
+          -90,
+          90,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "visual": {
+        "type": "model",
+        "mode": "3d",
+        "visible": true,
+        "rendered": {
+          "enabled": true,
+          "castsShadow": false,
+          "receivesShadow": false
+        },
+        "model": {
+          "id": "soul",
+          "tint": "#FFFF0000",
+          "scale": [
+            0.1,
+            0.1,
+            0.1
+          ]
+        }
+      },
+      "collision": {
+        "shape": "none"
+      },
+      "tags": [
+        "opening",
+        "opening_soul"
+      ],
+      "vars": {},
+      "components": [
+        {
+          "type": "velocity_movement"
+        }
+      ],
+      "events": {}
+    },
+    "battle_frame": {
+      "type": "scripted_actor",
+      "kind": "minetale:frame",
+      "role": "hybrid",
+      "transform": {
+        "space": "battle.canonical",
+        "position": [
+          0,
+          0,
+          0.55
+        ],
+        "rotationDeg": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          3.8,
+          0.2,
+          0.9
+        ]
+      },
+      "visual": {
+        "type": "frame",
+        "mode": "dual",
+        "visible": true,
+        "rendered": {"enabled":true,"castsShadow":false,"receivesShadow":true},
+        "frame": {
+          "worldSize": [
+            2,
+            2,
+            2
+          ],
+          "thickness": 0.045,
+          "borderColor": "#FFFFFFFF"
+        }
+      },
+      "collision": {
+        "shape": "box",
+        "space": "battle.canonical",
+        "halfSize": [
+          1,
+          1,
+          1
+        ]
+      },
+      "tags": [
+        "battle_frame",
+        "primary_frame",
+        "active_arena"
+      ],
+      "vars": {},
+      "components": [],
+      "events": {}
+    },
+    "enemy_flowey": {
+      "type": "scripted_actor",
+      "kind": "minetale:image",
+      "role": "presentation",
+      "visual": {
+        "type": "image",
+        "mode": "3d",
+        "visible": true,
+        "rendered": {"enabled":true,"castsShadow":false,"receivesShadow":false},
+        "image": {
+          "texture": "minetale:textures/gui/battle/character/flowey.png",
+          "source": [
+            0,
+            0,
+            45,
+            47
+          ],
+          "textureSize": [
+            45,
+            47
+          ],
+          "thickness": 0.05,
+          "tint": "#FFFFFFFF",
+          "fit": "contain",
+          "aspect": "source"
+        }
+      },
+      "collision": {
+        "shape": "none"
+      },
+      "tags": [
+        "enemy",
+        "battle_ui",
+        "character",
+        "world_plane",
+        "character_plane"
+      ],
+      "vars": {},
+      "components": [],
+      "events": {},
+      "transform": {
+        "space": "battle.canonical",
+        "position": [
+          0,
+          -2.4,
+          -1.875
+        ],
+        "rotationDeg": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          3.4,
+          1,
+          3.4
+        ]
+      }
+    },
+    "message_text": {
+      "type": "scripted_actor",
+      "kind": "minetale:text",
+      "role": "presentation",
+      "transform": {"space": "battle.canonical", "position": [0, 0, 0.5]},
+      "visual": {
+        "type": "text",
+        "mode": "3d",
+        "visible": true,
+        "rendered": {"enabled":false,"castsShadow":false,"receivesShadow":false},
+        "text": {
+          "value": "",
+          "color": "#FFFFFFFF",
+          "shadow": false,
+          "align": "left",
+          "verticalAlign": "top",
+          "fit": "wrap",
+          "fontScale": {
+            "type": "fixed",
+            "value": 2.5
+          },
+          "worldSize": [7.111, 1.25]
+        }
+      },
+      "collision": {
+        "shape": "none"
+      },
+      "tags": [
+        "ui",
+        "dialogue",
+        "text"
+      ],
+      "vars": {},
+      "components": [],
+      "events": {}
+    },
+    "player_name": {
+      "type": "scripted_actor",
+      "kind": "minetale:text",
+      "role": "presentation",
+      "transform": {"space": "battle.canonical", "position": [-2.944, 0.6, 1.844]},
+      "visual": {
+        "type": "text",
+        "mode": "3d",
+        "visible": true,
+        "rendered": {"enabled":false,"castsShadow":false,"receivesShadow":false},
+        "text": {
+          "value": "Steve",
+          "color": "#FFFFFFFF",
+          "shadow": false,
+          "align": "left",
+          "verticalAlign": "top",
+          "fit": "clip",
+          "fontScale": {
+            "type": "fixed",
+            "value": 3.2
+          },
+          "worldSize": [1.222, 0.3125]
+        }
+      },
+      "collision": {
+        "shape": "none"
+      },
+      "tags": [
+        "ui",
+        "text"
+      ],
+      "vars": {},
+      "components": [],
+      "events": {}
+    },
+    "player_lv": {
+      "type": "scripted_actor",
+      "kind": "minetale:text",
+      "role": "presentation",
+      "transform": {"space": "battle.canonical", "position": [-1.611, 0.6, 1.844]},
+      "visual": {
+        "type": "text",
+        "mode": "3d",
+        "visible": true,
+        "rendered": {"enabled":false,"castsShadow":false,"receivesShadow":false},
+        "text": {
+          "value": "LV 1",
+          "color": "#FFFFFFFF",
+          "shadow": false,
+          "align": "left",
+          "verticalAlign": "top",
+          "fit": "clip",
+          "fontScale": {
+            "type": "fixed",
+            "value": 3.2
+          },
+          "worldSize": [1, 0.3125]
+        }
+      },
+      "collision": {
+        "shape": "none"
+      },
+      "tags": [
+        "ui",
+        "text"
+      ],
+      "vars": {},
+      "components": [],
+      "events": {}
+    },
+    "player_hp_label": {
+      "type": "scripted_actor",
+      "kind": "minetale:text",
+      "role": "presentation",
+      "transform": {"space": "battle.canonical", "position": [-0.111, 0.6, 1.844]},
+      "visual": {
+        "type": "text",
+        "mode": "3d",
+        "visible": true,
+        "rendered": {"enabled":false,"castsShadow":false,"receivesShadow":false},
+        "text": {
+          "value": "HP",
+          "color": "#FFFFFFFF",
+          "shadow": false,
+          "align": "left",
+          "verticalAlign": "top",
+          "fit": "clip",
+          "fontScale": {
+            "type": "fixed",
+            "value": 3.2
+          },
+          "worldSize": [0.667, 0.3125]
+        }
+      },
+      "collision": {
+        "shape": "none"
+      },
+      "tags": [
+        "ui",
+        "text"
+      ],
+      "vars": {},
+      "components": [],
+      "events": {}
+    },
+    "player_hp_bar": {
+      "type": "scripted_actor",
+      "kind": "minetale:progress",
+      "role": "presentation",
+      "transform": {"space": "battle.canonical", "position": [0.778, 0.6, 1.844]},
+      "visual": {
+        "type": "progress_bar",
+        "mode": "3d",
+        "visible": true,
+        "rendered": {"enabled":false,"castsShadow":false,"receivesShadow":false},
+        "progress": {
+          "min": 0,
+          "max": 1,
+          "value": 1,
+          "fillColor": "#FFFFD000",
+          "backgroundColor": "#FF500000",
+          "borderColor": "#00FFFFFF",
+          "borderWidth": 0,
+          "worldSize": [1.333, 0.25],
+          "thickness": 0.05
+        }
+      },
+      "collision": {
+        "shape": "none"
+      },
+      "tags": [
+        "ui",
+        "hud",
+        "hp"
+      ],
+      "vars": {},
+      "components": [],
+      "events": {}
+    },
+    "player_hp_text": {
+      "type": "scripted_actor",
+      "kind": "minetale:text",
+      "role": "presentation",
+      "transform": {"space": "battle.canonical", "position": [2.222, 0.6, 1.844]},
+      "visual": {
+        "type": "text",
+        "mode": "3d",
+        "visible": true,
+        "rendered": {"enabled":false,"castsShadow":false,"receivesShadow":false},
+        "text": {
+          "value": "20 / 20",
+          "color": "#FFFFFFFF",
+          "shadow": false,
+          "align": "left",
+          "verticalAlign": "top",
+          "fit": "clip",
+          "fontScale": {
+            "type": "fixed",
+            "value": 3.2
+          },
+          "worldSize": [1.333, 0.3125]
+        }
+      },
+      "collision": {
+        "shape": "none"
+      },
+      "tags": [
+        "ui",
+        "text"
+      ],
+      "vars": {},
+      "components": [],
+      "events": {}
+    },
+    "option_fight": {
+      "type": "scripted_actor",
+      "kind": "minetale:image",
+      "role": "presentation",
+      "visual": {
+        "type": "image",
+        "mode": "3d",
+        "visible": true,
+        "rendered": {"enabled":true,"castsShadow":true,"receivesShadow":true},
+        "image": {
+          "texture": "minetale:textures/gui/battle/zh_cn/fight_decision_en.png",
+          "source": [
+            0,
+            0,
+            114,
+            46
+          ],
+          "textureSize": [
+            114,
+            46
+          ],
+          "thickness": 0.05,
+          "tint": "#FFFFFFFF",
+          "fit": "contain",
+          "aspect": "source"
+        }
+      },
+      "collision": {
+        "shape": "none"
+      },
+      "tags": [
+        "command_option",
+        "command_fight",
+        "ui",
+        "world_plane",
+        "command_plane"
+      ],
+      "vars": {},
+      "components": [],
+      "events": {},
+      "transform": {
+        "space": "battle.canonical",
+        "position": [
+          -3.5,
+          1.2,
+          2.375
+        ],
+        "rotationDeg": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          0.87,
+          1,
+          0.87
+        ]
+      }
+    },
+    "option_act": {
+      "type": "scripted_actor",
+      "kind": "minetale:image",
+      "role": "presentation",
+      "visual": {
+        "type": "image",
+        "mode": "3d",
+        "visible": true,
+        "rendered": {"enabled":true,"castsShadow":true,"receivesShadow":true},
+        "image": {
+          "texture": "minetale:textures/gui/battle/zh_cn/action_decision_un.png",
+          "source": [
+            0,
+            0,
+            114,
+            46
+          ],
+          "textureSize": [
+            114,
+            46
+          ],
+          "thickness": 0.05,
+          "tint": "#FFFFFFFF",
+          "fit": "contain",
+          "aspect": "source"
+        }
+      },
+      "collision": {
+        "shape": "none"
+      },
+      "tags": [
+        "command_option",
+        "command_act",
+        "ui",
+        "world_plane",
+        "command_plane"
+      ],
+      "vars": {},
+      "components": [],
+      "events": {},
+      "transform": {
+        "space": "battle.canonical",
+        "position": [
+          -1.167,
+          1.2,
+          2.375
+        ],
+        "rotationDeg": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          0.87,
+          1,
+          0.87
+        ]
+      }
+    },
+    "option_item": {
+      "type": "scripted_actor",
+      "kind": "minetale:image",
+      "role": "presentation",
+      "visual": {
+        "type": "image",
+        "mode": "3d",
+        "visible": true,
+        "rendered": {"enabled":true,"castsShadow":true,"receivesShadow":true},
+        "image": {
+          "texture": "minetale:textures/gui/battle/zh_cn/item_decision_un.png",
+          "source": [
+            0,
+            0,
+            114,
+            46
+          ],
+          "textureSize": [
+            114,
+            46
+          ],
+          "thickness": 0.05,
+          "tint": "#FFFFFFFF",
+          "fit": "contain",
+          "aspect": "source"
+        }
+      },
+      "collision": {
+        "shape": "none"
+      },
+      "tags": [
+        "command_option",
+        "command_item",
+        "ui",
+        "world_plane",
+        "command_plane"
+      ],
+      "vars": {},
+      "components": [],
+      "events": {},
+      "transform": {
+        "space": "battle.canonical",
+        "position": [
+          1.167,
+          1.2,
+          2.375
+        ],
+        "rotationDeg": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          0.87,
+          1,
+          0.87
+        ]
+      }
+    },
+    "option_mercy": {
+      "type": "scripted_actor",
+      "kind": "minetale:image",
+      "role": "presentation",
+      "visual": {
+        "type": "image",
+        "mode": "3d",
+        "visible": true,
+        "rendered": {"enabled":true,"castsShadow":true,"receivesShadow":true},
+        "image": {
+          "texture": "minetale:textures/gui/battle/zh_cn/mercy_decision_un.png",
+          "source": [
+            0,
+            0,
+            114,
+            46
+          ],
+          "textureSize": [
+            114,
+            46
+          ],
+          "thickness": 0.05,
+          "tint": "#FFFFFFFF",
+          "fit": "contain",
+          "aspect": "source"
+        }
+      },
+      "collision": {
+        "shape": "none"
+      },
+      "tags": [
+        "command_option",
+        "command_mercy",
+        "ui",
+        "world_plane",
+        "command_plane"
+      ],
+      "vars": {},
+      "components": [],
+      "events": {},
+      "transform": {
+        "space": "battle.canonical",
+        "position": [
+          3.5,
+          1.2,
+          2.375
+        ],
+        "rotationDeg": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          0.87,
+          1,
+          0.87
+        ]
+      }
+    },
+    "bullet_sprite": {
+      "type": "scripted_actor",
+      "kind": "minetale:bullet_sprite",
+      "role": "gameplay",
+      "transform": {
+        "space": "battle.canonical",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotationDeg": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1.6,
+          1.6,
+          1.6
+        ]
+      },
+      "visual": {
+        "type": "image_model",
+        "mode": "dual",
+        "visible": true,
+        "rendered": {"enabled":true,"castsShadow":true,"receivesShadow":true},
+        "image": {
+          "texture": "minetale:textures/gui/battle/bullet1.png",
+          "source": [
+            0,
+            0,
+            7,
+            7
+          ],
+          "textureSize": [
+            7,
+            7
+          ],
+          "tint": "#FFFFFFFF",
+          "fit": "contain",
+          "aspect": "source"
+        },
+        "model": {
+          "id": "bullet1",
+          "tint": "#FFFFFFFF",
+          "scale": [0.125, 0.125, 0.125]
+        }
+      },
+      "collision": {
+        "shape": "box",
+        "space": "battle.canonical",
+        "halfSize": [
+          0.055,
+          0.055,
+          0.055
+        ]
+      },
+      "collisionPolicy": {
+        "type": "projected_2d"
+      },
+      "tags": [
+        "attack",
+        "bullet",
+        "sprite_bullet"
+      ],
+      "components": [
+        {
+          "type": "velocity_movement"
+        },
+        {
+          "type": "damage_on_touch",
+          "target": "player",
+          "amount": 2,
+          "attackType": "white"
+        },
+        {
+          "type": "destroy_on_touch",
+          "target": "player",
+          "self": true
+        },
+        {
+          "type": "lifetime",
+          "seconds": 6
+        }
+      ],
+      "events": {
+        "onSpawn": [
+          {"type": "play_sound", "sound": "minetale:battle.bullet_whoosh", "source": "hostile", "volumeMultiplier": 0.7, "pitchMultiplier": {"type": "random_number", "min": 0.9, "max": 1.1}}
+        ],
+        "onCollidePlayer": [
+          {"type": "play_sound", "sound": "minetale:battle.soul_hurt", "source": "player"},
+          {"type": "call_pattern", "id": "sync_hp_bar"}
+        ]
+      }
+    },
+    "bullet_sprite_bounce": {
+      "type": "scripted_actor",
+      "kind": "minetale:bullet_sprite_bounce",
+      "role": "gameplay",
+      "transform": {
+        "space": "battle.canonical",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotationDeg": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1.8,
+          1.8,
+          1.8
+        ]
+      },
+      "visual": {
+        "type": "image_model",
+        "mode": "dual",
+        "visible": true,
+        "rendered": {"enabled":true,"castsShadow":true,"receivesShadow":true},
+        "image": {
+          "texture": "minetale:textures/gui/battle/bullet1.png",
+          "source": [
+            0,
+            0,
+            7,
+            7
+          ],
+          "textureSize": [
+            7,
+            7
+          ],
+          "tint": "#FFFFFFFF",
+          "fit": "contain",
+          "aspect": "source"
+        },
+        "model": {
+          "id": "bullet1",
+          "tint": "#FFFFFFFF",
+          "scale": [0.125, 0.125, 0.125]
+        }
+      },
+      "collision": {
+        "shape": "box",
+        "space": "battle.canonical",
+        "halfSize": [
+          0.06,
+          0.06,
+          0.06
+        ]
+      },
+      "collisionPolicy": {
+        "type": "projected_2d"
+      },
+      "tags": [
+        "attack",
+        "bullet",
+        "sprite_bullet",
+        "bouncing"
+      ],
+      "components": [
+        {
+          "type": "velocity_movement"
+        },
+        {
+          "type": "bounce_on_battle_box",
+          "remainingRebounds": 12,
+          "onSpent": "destroy"
+        },
+        {
+          "type": "spin",
+          "degreesPerSecond": 240
+        },
+        {
+          "type": "damage_on_touch",
+          "target": "player",
+          "amount": 2,
+          "attackType": "white"
+        },
+        {
+          "type": "destroy_on_touch",
+          "target": "player",
+          "self": true
+        },
+        {
+          "type": "lifetime",
+          "seconds": 7
+        }
+      ],
+      "events": {
+        "onSpawn": [
+          {"type": "play_sound", "sound": "minetale:battle.bullet_whoosh", "source": "hostile", "volumeMultiplier": 0.7, "pitchMultiplier": {"type": "random_number", "min": 0.9, "max": 1.1}}
+        ],
+        "onCollidePlayer": [
+          {"type": "play_sound", "sound": "minetale:battle.soul_hurt", "source": "player"},
+          {"type": "call_pattern", "id": "sync_hp_bar"}
+        ]
+      }
+    },
+    "bullet_model": {
+      "type": "scripted_actor",
+      "kind": "minetale:bullet_model",
+      "role": "gameplay",
+      "transform": {
+        "space": "battle.canonical",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotationDeg": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          0.8,
+          0.8,
+          0.8
+        ]
+      },
+      "visual": {
+        "type": "image_model",
+        "mode": "dual",
+        "visible": true,
+        "rendered": {"enabled":true,"castsShadow":true,"receivesShadow":true},
+        "image": {
+          "texture": "minetale:textures/gui/battle/bullet1.png",
+          "source": [0, 0, 7, 7],
+          "textureSize": [7, 7]
+        },
+        "model": {
+          "id": "bullet1",
+          "tint": "#FFFFFFFF",
+          "scale": [0.125, 0.125, 0.125]
+        }
+      },
+      "collision": {
+        "shape": "box",
+        "space": "battle.canonical",
+        "halfSize": [
+          0.06,
+          0.06,
+          0.06
+        ]
+      },
+      "collisionPolicy": {
+        "type": "volume_3d"
+      },
+      "tags": [
+        "attack",
+        "bullet",
+        "model_bullet"
+      ],
+      "components": [
+        {
+          "type": "velocity_movement"
+        },
+        {
+          "type": "spin",
+          "degreesPerSecond": 180
+        },
+        {
+          "type": "damage_on_touch",
+          "target": "player",
+          "amount": 2,
+          "attackType": "white"
+        },
+        {
+          "type": "destroy_on_touch",
+          "target": "player",
+          "self": true
+        },
+        {
+          "type": "lifetime",
+          "seconds": 7
+        }
+      ],
+      "events": {
+        "onSpawn": [
+          {"type": "play_sound", "sound": "minetale:battle.bullet_whoosh", "source": "hostile", "volumeMultiplier": 0.7, "pitchMultiplier": {"type": "random_number", "min": 0.9, "max": 1.1}}
+        ],
+        "onCollidePlayer": [
+          {"type": "play_sound", "sound": "minetale:battle.soul_hurt", "source": "player"},
+          {"type": "call_pattern", "id": "sync_hp_bar"}
+        ]
+      }
+    },
+    "bullet_model_bounce": {
+      "type": "scripted_actor",
+      "kind": "minetale:bullet_model_bounce",
+      "role": "gameplay",
+      "transform": {
+        "space": "battle.canonical",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotationDeg": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          0.96,
+          0.96,
+          0.96
+        ]
+      },
+      "visual": {
+        "type": "image_model",
+        "mode": "dual",
+        "visible": true,
+        "rendered": {"enabled":true,"castsShadow":true,"receivesShadow":true},
+        "image": {
+          "texture": "minetale:textures/gui/battle/bullet1.png",
+          "source": [0, 0, 7, 7],
+          "textureSize": [7, 7]
+        },
+        "model": {
+          "id": "bullet1",
+          "tint": "#FFFFFFFF",
+          "scale": [0.125, 0.125, 0.125]
+        }
+      },
+      "collision": {
+        "shape": "box",
+        "space": "battle.canonical",
+        "halfSize": [
+          0.065,
+          0.065,
+          0.065
+        ]
+      },
+      "collisionPolicy": {
+        "type": "volume_3d"
+      },
+      "tags": [
+        "attack",
+        "bullet",
+        "model_bullet",
+        "bouncing"
+      ],
+      "components": [
+        {
+          "type": "velocity_movement"
+        },
+        {
+          "type": "bounce_on_battle_box",
+          "remainingRebounds": 18,
+          "onSpent": "destroy"
+        },
+        {
+          "type": "spin",
+          "degreesPerSecond": 300
+        },
+        {
+          "type": "damage_on_touch",
+          "target": "player",
+          "amount": 2,
+          "attackType": "white"
+        },
+        {
+          "type": "destroy_on_touch",
+          "target": "player",
+          "self": true
+        },
+        {
+          "type": "lifetime",
+          "seconds": 8
+        }
+      ],
+      "events": {
+        "onSpawn": [
+          {"type": "play_sound", "sound": "minetale:battle.bullet_whoosh", "source": "hostile", "volumeMultiplier": 0.7, "pitchMultiplier": {"type": "random_number", "min": 0.9, "max": 1.1}}
+        ],
+        "onCollidePlayer": [
+          {"type": "play_sound", "sound": "minetale:battle.soul_hurt", "source": "player"},
+          {"type": "call_pattern", "id": "sync_hp_bar"}
+        ]
+      }
+    }
+  },
+  "rulesets": {
+    "player_locked": {
+      "rules": [
+        {
+          "domain": "player_control",
+          "controller": {
+            "type": "none"
+          }
+        }
+      ]
+    },
+    "enemy_red_soul": {
+      "rules": [
+        {
+          "domain": "player_control",
+          "controller": {
+            "type": "red_free",
+            "moveSpeedPerSecond": 1.55,
+            "allowVertical": true,
+            "clampToBattleBox": true
+          }
+        },
+        {
+          "domain": "damage",
+          "invincibleSeconds": 0.65
+        }
+      ]
+    }
+  },
+  "patterns": {
+    "menu_previous": {
+      "actions": [
+        {
+          "type": "if",
+          "when": {"read": "script.var:menu_active", "op": "eq", "right": true},
+          "actions": [
+            {"type": "play_sound", "sound": "minetale:ui.select", "source": "ui"},
+            {
+              "type": "if_else",
+              "when": {"read": "script.var:menu_level", "op": "eq", "right": 0},
+              "actions": [
+                {"type": "set_var", "var": "menu_selection", "value": {"type": "mod", "left": {"type": "number_binary_op", "op": "add", "left": {"read": "script.var:menu_selection"}, "right": 3}, "right": 4}},
+                {"type": "call_pattern", "id": "menu_refresh_root"}
+              ],
+              "elseActions": [
+                {"type": "set_var", "var": "submenu_selection", "value": {"type": "mod", "left": {"type": "number_binary_op", "op": "add", "left": {"read": "script.var:submenu_selection"}, "right": 1}, "right": 2}},
+                {"type": "call_pattern", "id": "menu_refresh_submenu"}
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "menu_next": {
+      "actions": [
+        {
+          "type": "if",
+          "when": {"read": "script.var:menu_active", "op": "eq", "right": true},
+          "actions": [
+            {"type": "play_sound", "sound": "minetale:ui.select", "source": "ui"},
+            {
+              "type": "if_else",
+              "when": {"read": "script.var:menu_level", "op": "eq", "right": 0},
+              "actions": [
+                {"type": "set_var", "var": "menu_selection", "value": {"type": "mod", "left": {"type": "number_binary_op", "op": "add", "left": {"read": "script.var:menu_selection"}, "right": 1}, "right": 4}},
+                {"type": "call_pattern", "id": "menu_refresh_root"}
+              ],
+              "elseActions": [
+                {"type": "set_var", "var": "submenu_selection", "value": {"type": "mod", "left": {"type": "number_binary_op", "op": "add", "left": {"read": "script.var:submenu_selection"}, "right": 1}, "right": 2}},
+                {"type": "call_pattern", "id": "menu_refresh_submenu"}
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "submenu_previous": {
+      "actions": [
+        {
+          "type": "if",
+          "when": {"all": [
+            {"read": "script.var:menu_active", "op": "eq", "right": true},
+            {"read": "script.var:menu_level", "op": "eq", "right": 1}
+          ]},
+          "actions": [
+            {"type": "play_sound", "sound": "minetale:ui.select", "source": "ui"},
+            {"type": "set_var", "var": "submenu_selection", "value": {"type": "mod", "left": {"type": "number_binary_op", "op": "add", "left": {"read": "script.var:submenu_selection"}, "right": 1}, "right": 2}},
+            {"type": "call_pattern", "id": "menu_refresh_submenu"}
+          ]
+        }
+      ]
+    },
+    "submenu_next": {
+      "actions": [
+        {"type": "call_pattern", "id": "submenu_previous"}
+      ]
+    },
+    "menu_refresh_root": {
+      "actions": [
+        {"type": "call_pattern", "id": "ui_enemy"},
+        {"type": "if", "when": {"read": "script.var:menu_selection", "op": "eq", "right": 0}, "actions": [{"type": "call_pattern", "id": "menu_select_fight"}]},
+        {"type": "if", "when": {"read": "script.var:menu_selection", "op": "eq", "right": 1}, "actions": [{"type": "call_pattern", "id": "menu_select_act"}]},
+        {"type": "if", "when": {"read": "script.var:menu_selection", "op": "eq", "right": 2}, "actions": [{"type": "call_pattern", "id": "menu_select_item"}]},
+        {"type": "if", "when": {"read": "script.var:menu_selection", "op": "eq", "right": 3}, "actions": [{"type": "call_pattern", "id": "menu_select_mercy"}]}
+      ]
+    },
+    "menu_select_fight": {
+      "actions": [
+        {"type": "set_actor_image_texture", "actorId": "option_fight", "texture": "minetale:textures/gui/battle/zh_cn/fight_decision_en.png", "source": [0, 0, 114, 46], "textureSize": [114, 46]},
+        {"type": "set_actor_property", "target": "player", "property": "bounds_center_position", "value": [-3.9, 1.2, 2.375]}
+      ]
+    },
+    "menu_select_act": {
+      "actions": [
+        {"type": "set_actor_image_texture", "actorId": "option_act", "texture": "minetale:textures/gui/battle/zh_cn/action_decision_en.png", "source": [0, 0, 114, 46], "textureSize": [114, 46]},
+        {"type": "set_actor_property", "target": "player", "property": "bounds_center_position", "value": [-1.567, 1.2, 2.375]}
+      ]
+    },
+    "menu_select_item": {
+      "actions": [
+        {"type": "set_actor_image_texture", "actorId": "option_item", "texture": "minetale:textures/gui/battle/zh_cn/item_decision_en.png", "source": [0, 0, 114, 46], "textureSize": [114, 46]},
+        {"type": "set_actor_property", "target": "player", "property": "bounds_center_position", "value": [0.767, 1.2, 2.375]}
+      ]
+    },
+    "menu_select_mercy": {
+      "actions": [
+        {"type": "set_actor_image_texture", "actorId": "option_mercy", "texture": "minetale:textures/gui/battle/zh_cn/mercy_decision_en.png", "source": [0, 0, 114, 46], "textureSize": [114, 46]},
+        {"type": "set_actor_property", "target": "player", "property": "bounds_center_position", "value": [3.1, 1.2, 2.375]}
+      ]
+    },
+    "menu_refresh_submenu": {
+      "actions": [
+        {"type": "if", "when": {"read": "script.var:submenu_selection", "op": "eq", "right": 0}, "actions": [{"type": "set_actor_property", "target": "player", "property": "bounds_center_position", "value": [-3.5, 0, 0.02]}]},
+        {"type": "if", "when": {"read": "script.var:submenu_selection", "op": "eq", "right": 1}, "actions": [{"type": "set_actor_property", "target": "player", "property": "bounds_center_position", "value": [-3.5, 0, 0.3]}]}
+      ]
+    },
+    "menu_confirm": {
+      "actions": [
+        {
+          "type": "if",
+          "when": {"read": "script.var:menu_active", "op": "eq", "right": true},
+          "actions": [
+            {"type": "play_sound", "sound": "minetale:ui.confirm", "source": "ui"},
+            {
+              "type": "if_else",
+              "when": {"read": "script.var:menu_level", "op": "eq", "right": 0},
+              "actions": [
+                {"type": "if", "when": {"read": "script.var:menu_selection", "op": "eq", "right": 0}, "actions": [{"type": "type_actor_text", "actorId": "message_text", "text": "* 战斗功能尚未在本原型中实现。", "secondsPerCharacter": 0.035}]},
+                {"type": "if", "when": {"read": "script.var:menu_selection", "op": "eq", "right": 1}, "actions": [
+                  {"type": "set_var", "var": "menu_level", "value": 1},
+                  {"type": "set_var", "var": "submenu_selection", "value": 0},
+                  {"type": "call_pattern", "id": "menu_refresh_submenu"},
+                  {"type": "type_actor_text", "actorId": "message_text", "text": "* 查看\n* 交谈", "secondsPerCharacter": 0.035}
+                ]},
+                {"type": "if", "when": {"read": "script.var:menu_selection", "op": "eq", "right": 2}, "actions": [
+                  {"type": "set_var", "var": "menu_level", "value": 1},
+                  {"type": "set_var", "var": "submenu_selection", "value": 0},
+                  {"type": "call_pattern", "id": "menu_refresh_submenu"},
+                  {"type": "type_actor_text", "actorId": "message_text", "text": "* 怪物糖果\n* 绷带", "secondsPerCharacter": 0.035}
+                ]},
+                {"type": "if", "when": {"all": [{"read": "script.var:menu_selection", "op": "eq", "right": 3}, {"read": "script.var:next_enemy_phase", "op": "eq", "right": 0}]}, "actions": [{"type": "end_phase", "to": "enemy_turn_2d"}]},
+                {"type": "if", "when": {"all": [{"read": "script.var:menu_selection", "op": "eq", "right": 3}, {"read": "script.var:next_enemy_phase", "op": "eq", "right": 1}]}, "actions": [{"type": "end_phase", "to": "enemy_turn_3d"}]}
+              ],
+              "elseActions": [
+                {"type": "if", "when": {"all": [{"read": "script.var:menu_selection", "op": "eq", "right": 1}, {"read": "script.var:submenu_selection", "op": "eq", "right": 0}]}, "actions": [{"type": "type_actor_text", "actorId": "message_text", "text": "* 查看\n* 小花 - ATK 1 DEF 1", "secondsPerCharacter": 0.035}]},
+                {"type": "if", "when": {"all": [{"read": "script.var:menu_selection", "op": "eq", "right": 1}, {"read": "script.var:submenu_selection", "op": "eq", "right": 1}]}, "actions": [{"type": "type_actor_text", "actorId": "message_text", "text": "* 交谈\n* 小花没有回应。", "secondsPerCharacter": 0.035}]},
+                {"type": "if", "when": {"all": [{"read": "script.var:menu_selection", "op": "eq", "right": 2}, {"read": "script.var:submenu_selection", "op": "eq", "right": 0}]}, "actions": [{"type": "type_actor_text", "actorId": "message_text", "text": "* 怪物糖果\n* 物品功能尚未实现。", "secondsPerCharacter": 0.035}]},
+                {"type": "if", "when": {"all": [{"read": "script.var:menu_selection", "op": "eq", "right": 2}, {"read": "script.var:submenu_selection", "op": "eq", "right": 1}]}, "actions": [{"type": "type_actor_text", "actorId": "message_text", "text": "* 绷带\n* 物品功能尚未实现。", "secondsPerCharacter": 0.035}]}
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "menu_cancel": {
+      "actions": [
+        {
+          "type": "if",
+          "when": {"all": [
+            {"read": "script.var:menu_active", "op": "eq", "right": true},
+            {"read": "script.var:menu_level", "op": "eq", "right": 1}
+          ]},
+          "actions": [
+            {"type": "set_var", "var": "menu_level", "value": 0},
+            {"type": "set_var", "var": "submenu_selection", "value": 0},
+            {"type": "call_pattern", "id": "menu_refresh_root"},
+            {"type": "type_actor_text", "actorId": "message_text", "text": "* 小花正在等待你的选择。", "secondsPerCharacter": 0.035}
+          ]
+        }
+      ]
+    },
+    "ui_player_fight": {
+      "actions": [
+        {
+          "type": "set_actor_image_texture",
+          "actorId": "option_fight",
+          "texture": "minetale:textures/gui/battle/zh_cn/fight_decision_en.png",
+          "source": [
+            0,
+            0,
+            114,
+            46
+          ],
+          "textureSize": [
+            114,
+            46
+          ]
+        },
+        {
+          "type": "set_actor_image_texture",
+          "actorId": "option_act",
+          "texture": "minetale:textures/gui/battle/zh_cn/action_decision_un.png",
+          "source": [
+            0,
+            0,
+            114,
+            46
+          ],
+          "textureSize": [
+            114,
+            46
+          ]
+        },
+        {
+          "type": "set_actor_image_texture",
+          "actorId": "option_item",
+          "texture": "minetale:textures/gui/battle/zh_cn/item_decision_un.png",
+          "source": [
+            0,
+            0,
+            114,
+            46
+          ],
+          "textureSize": [
+            114,
+            46
+          ]
+        },
+        {
+          "type": "set_actor_image_texture",
+          "actorId": "option_mercy",
+          "texture": "minetale:textures/gui/battle/zh_cn/mercy_decision_un.png",
+          "source": [
+            0,
+            0,
+            114,
+            46
+          ],
+          "textureSize": [
+            114,
+            46
+          ]
+        }
+      ]
+    },
+    "ui_player_act": {
+      "actions": [
+        {
+          "type": "set_actor_image_texture",
+          "actorId": "option_fight",
+          "texture": "minetale:textures/gui/battle/zh_cn/fight_decision_un.png",
+          "source": [
+            0,
+            0,
+            114,
+            46
+          ],
+          "textureSize": [
+            114,
+            46
+          ]
+        },
+        {
+          "type": "set_actor_image_texture",
+          "actorId": "option_act",
+          "texture": "minetale:textures/gui/battle/zh_cn/action_decision_en.png",
+          "source": [
+            0,
+            0,
+            114,
+            46
+          ],
+          "textureSize": [
+            114,
+            46
+          ]
+        },
+        {
+          "type": "set_actor_image_texture",
+          "actorId": "option_item",
+          "texture": "minetale:textures/gui/battle/zh_cn/item_decision_un.png",
+          "source": [
+            0,
+            0,
+            114,
+            46
+          ],
+          "textureSize": [
+            114,
+            46
+          ]
+        },
+        {
+          "type": "set_actor_image_texture",
+          "actorId": "option_mercy",
+          "texture": "minetale:textures/gui/battle/zh_cn/mercy_decision_un.png",
+          "source": [
+            0,
+            0,
+            114,
+            46
+          ],
+          "textureSize": [
+            114,
+            46
+          ]
+        }
+      ]
+    },
+    "ui_enemy": {
+      "actions": [
+        {
+          "type": "set_actor_image_texture",
+          "actorId": "option_fight",
+          "texture": "minetale:textures/gui/battle/zh_cn/fight_decision_un.png",
+          "source": [
+            0,
+            0,
+            114,
+            46
+          ],
+          "textureSize": [
+            114,
+            46
+          ]
+        },
+        {
+          "type": "set_actor_image_texture",
+          "actorId": "option_act",
+          "texture": "minetale:textures/gui/battle/zh_cn/action_decision_un.png",
+          "source": [
+            0,
+            0,
+            114,
+            46
+          ],
+          "textureSize": [
+            114,
+            46
+          ]
+        },
+        {
+          "type": "set_actor_image_texture",
+          "actorId": "option_item",
+          "texture": "minetale:textures/gui/battle/zh_cn/item_decision_un.png",
+          "source": [
+            0,
+            0,
+            114,
+            46
+          ],
+          "textureSize": [
+            114,
+            46
+          ]
+        },
+        {
+          "type": "set_actor_image_texture",
+          "actorId": "option_mercy",
+          "texture": "minetale:textures/gui/battle/zh_cn/mercy_decision_un.png",
+          "source": [
+            0,
+            0,
+            114,
+            46
+          ],
+          "textureSize": [
+            114,
+            46
+          ]
+        }
+      ]
+    },
+    "frame_dialogue": {
+      "actions": [
+        {
+          "type": "set_actor_property",
+          "actorId": "battle_frame",
+          "property": "position",
+          "value": [
+            0,
+            0,
+            0.55
+          ]
+        },
+        {
+          "type": "set_actor_property",
+          "actorId": "battle_frame",
+          "property": "scale",
+          "value": [
+            3.8,
+            0.2,
+            0.9
+          ]
+        },
+        {
+          "type": "set_actor_property",
+          "target": "player",
+          "property": "bounds_center_position",
+          "value": [
+            0,
+            0,
+            4
+          ]
+        }
+      ]
+    },
+    "frame_arena_2d": {
+      "actions": [
+        {
+          "type": "set_actor_property",
+          "actorId": "battle_frame",
+          "property": "position",
+          "value": [
+            0,
+            0,
+            0.3
+          ]
+        },
+        {
+          "type": "set_actor_property",
+          "actorId": "battle_frame",
+          "property": "scale",
+          "value": [
+            1.25,
+            0.22,
+            1
+          ]
+        },
+        {
+          "type": "set_actor_property",
+          "target": "player",
+          "property": "bounds_center_position",
+          "value": [
+            0,
+            0,
+            0.3
+          ]
+        }
+      ]
+    },
+    "frame_arena_3d": {
+      "actions": [
+        {
+          "type": "set_actor_property",
+          "actorId": "battle_frame",
+          "property": "position",
+          "value": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "type": "set_actor_property",
+          "actorId": "battle_frame",
+          "property": "scale",
+          "value": [
+            1.15,
+            1.15,
+            1
+          ]
+        },
+        {
+          "type": "set_actor_property",
+          "target": "player",
+          "property": "bounds_center_position",
+          "value": [
+            0,
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    "sync_hp_bar": {
+      "actions": [
+        {
+          "type": "set_actor_progress_value",
+          "actorId": "player_hp_bar",
+          "value": {
+            "read": "player.any.hp_percent"
+          }
+        },
+        {
+          "type": "set_actor_text",
+          "actorId": "player_hp_text",
+          "text": {
+            "read": "player.any.hp_text"
+          }
+        }
+      ]
+    },
+    "attack_2d_rain": {
+      "actions": [
+        {
+          "type": "repeat",
+          "count": 16,
+          "actions": [
+            {
+              "type": "spawn_actor",
+              "prefab": "bullet_sprite",
+              "tags": [
+                "phase_temp",
+                "attack_2d",
+                "rain"
+              ],
+              "transform": {
+                "space": "battle.canonical",
+                "position": {
+                  "type": "vector3",
+                  "x": {
+                    "type": "random_number",
+                    "min": -1.05,
+                    "max": 1.05
+                  },
+                  "y": 0,
+                  "z": -0.68
+                }
+              },
+              "velocity": {
+                "space": "battle.canonical",
+                "value": {
+                  "type": "vector3",
+                  "x": {
+                    "type": "random_number",
+                    "min": -0.18,
+                    "max": 0.18
+                  },
+                  "y": 0,
+                  "z": {
+                    "type": "random_number",
+                    "min": 1,
+                    "max": 1.35
+                  }
+                }
+              }
+            },
+            {
+              "type": "wait",
+              "seconds": 0.1
+            }
+          ]
+        },
+        {
+          "type": "wait",
+          "seconds": 2.8
+        }
+      ]
+    },
+    "attack_2d_crossfire": {
+      "actions": [
+        {
+          "type": "parallel",
+          "actions": [
+            {
+              "type": "sequence",
+              "actions": [
+                {
+                  "type": "repeat",
+                  "count": 9,
+                  "actions": [
+                    {
+                      "type": "spawn_actor",
+                      "prefab": "bullet_sprite",
+                      "tags": [
+                        "phase_temp",
+                        "attack_2d",
+                        "crossfire_left"
+                      ],
+                      "transform": {
+                        "space": "battle.canonical",
+                        "position": {
+                          "type": "vector3",
+                          "x": -1.05,
+                          "y": 0,
+                          "z": {
+                            "type": "random_number",
+                            "min": -0.55,
+                            "max": 1.05
+                          }
+                        }
+                      },
+                      "velocity": {
+                        "space": "battle.canonical",
+                        "value": {
+                          "type": "vector3",
+                          "x": {
+                            "type": "random_number",
+                            "min": 1.05,
+                            "max": 1.4
+                          },
+                          "y": 0,
+                          "z": {
+                            "type": "random_number",
+                            "min": -0.12,
+                            "max": 0.12
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "type": "wait",
+                      "seconds": 0.18
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "sequence",
+              "actions": [
+                {
+                  "type": "repeat",
+                  "count": 9,
+                  "actions": [
+                    {
+                      "type": "spawn_actor",
+                      "prefab": "bullet_sprite",
+                      "tags": [
+                        "phase_temp",
+                        "attack_2d",
+                        "crossfire_right"
+                      ],
+                      "transform": {
+                        "space": "battle.canonical",
+                        "position": {
+                          "type": "vector3",
+                          "x": 1.05,
+                          "y": 0,
+                          "z": {
+                            "type": "random_number",
+                            "min": -0.55,
+                            "max": 1.05
+                          }
+                        }
+                      },
+                      "velocity": {
+                        "space": "battle.canonical",
+                        "value": {
+                          "type": "vector3",
+                          "x": {
+                            "type": "random_number",
+                            "min": -1.4,
+                            "max": -1.05
+                          },
+                          "y": 0,
+                          "z": {
+                            "type": "random_number",
+                            "min": -0.12,
+                            "max": 0.12
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "type": "wait",
+                      "seconds": 0.18
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "wait",
+          "seconds": 2.7
+        }
+      ]
+    },
+    "attack_2d_bounce": {
+      "actions": [
+        {
+          "type": "repeat",
+          "count": 6,
+          "actions": [
+            {
+              "type": "spawn_actor",
+              "prefab": "bullet_sprite_bounce",
+              "tags": [
+                "phase_temp",
+                "attack_2d",
+                "bounce"
+              ],
+              "transform": {
+                "space": "battle.canonical",
+                "position": {
+                  "type": "vector3",
+                  "x": {
+                    "type": "random_number",
+                    "min": -0.6,
+                    "max": 0.6
+                  },
+                  "y": 0,
+                  "z": {
+                    "type": "random_number",
+                    "min": -0.3,
+                    "max": 0.8
+                  }
+                }
+              },
+              "velocity": {
+                "space": "battle.canonical",
+                "value": {
+                  "type": "vector3",
+                  "x": {
+                    "type": "random_number",
+                    "min": -1.25,
+                    "max": 1.25
+                  },
+                  "y": 0,
+                  "z": {
+                    "type": "random_number",
+                    "min": -1.25,
+                    "max": 1.25
+                  }
+                }
+              }
+            },
+            {
+              "type": "wait",
+              "seconds": 0.34
+            }
+          ]
+        },
+        {
+          "type": "wait",
+          "seconds": 3.1
+        }
+      ]
+    },
+    "attack_3d_tunnel": {
+      "actions": [
+        {
+          "type": "repeat",
+          "count": 15,
+          "actions": [
+            {
+              "type": "spawn_actor",
+              "prefab": "bullet_model",
+              "tags": [
+                "phase_temp",
+                "attack_3d",
+                "tunnel"
+              ],
+              "transform": {
+                "space": "battle.canonical",
+                "position": {
+                  "type": "vector3",
+                  "x": {
+                    "type": "random_number",
+                    "min": -0.95,
+                    "max": 0.95
+                  },
+                  "y": 1.02,
+                  "z": {
+                    "type": "random_number",
+                    "min": -0.75,
+                    "max": 0.75
+                  }
+                }
+              },
+              "velocity": {
+                "space": "battle.canonical",
+                "value": {
+                  "type": "vector3",
+                  "x": {
+                    "type": "random_number",
+                    "min": -0.15,
+                    "max": 0.15
+                  },
+                  "y": {
+                    "type": "random_number",
+                    "min": -1.35,
+                    "max": -1.05
+                  },
+                  "z": {
+                    "type": "random_number",
+                    "min": -0.12,
+                    "max": 0.12
+                  }
+                }
+              }
+            },
+            {
+              "type": "wait",
+              "seconds": 0.12
+            }
+          ]
+        },
+        {
+          "type": "wait",
+          "seconds": 3
+        }
+      ]
+    },
+    "attack_3d_cross": {
+      "actions": [
+        {
+          "type": "parallel",
+          "actions": [
+            {
+              "type": "sequence",
+              "actions": [
+                {
+                  "type": "repeat",
+                  "count": 8,
+                  "actions": [
+                    {
+                      "type": "spawn_actor",
+                      "prefab": "bullet_model",
+                      "tags": [
+                        "phase_temp",
+                        "attack_3d",
+                        "cross_x_left"
+                      ],
+                      "transform": {
+                        "space": "battle.canonical",
+                        "position": {
+                          "type": "vector3",
+                          "x": -1,
+                          "y": {
+                            "type": "random_number",
+                            "min": -0.85,
+                            "max": 0.85
+                          },
+                          "z": {
+                            "type": "random_number",
+                            "min": -0.7,
+                            "max": 0.7
+                          }
+                        }
+                      },
+                      "velocity": {
+                        "space": "battle.canonical",
+                        "value": {
+                          "type": "vector3",
+                          "x": {
+                            "type": "random_number",
+                            "min": 1.05,
+                            "max": 1.35
+                          },
+                          "y": {
+                            "type": "random_number",
+                            "min": -0.12,
+                            "max": 0.12
+                          },
+                          "z": {
+                            "type": "random_number",
+                            "min": -0.12,
+                            "max": 0.12
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "type": "wait",
+                      "seconds": 0.22
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "sequence",
+              "actions": [
+                {
+                  "type": "repeat",
+                  "count": 8,
+                  "actions": [
+                    {
+                      "type": "spawn_actor",
+                      "prefab": "bullet_model",
+                      "tags": [
+                        "phase_temp",
+                        "attack_3d",
+                        "cross_x_right"
+                      ],
+                      "transform": {
+                        "space": "battle.canonical",
+                        "position": {
+                          "type": "vector3",
+                          "x": 1,
+                          "y": {
+                            "type": "random_number",
+                            "min": -0.85,
+                            "max": 0.85
+                          },
+                          "z": {
+                            "type": "random_number",
+                            "min": -0.7,
+                            "max": 0.7
+                          }
+                        }
+                      },
+                      "velocity": {
+                        "space": "battle.canonical",
+                        "value": {
+                          "type": "vector3",
+                          "x": {
+                            "type": "random_number",
+                            "min": -1.35,
+                            "max": -1.05
+                          },
+                          "y": {
+                            "type": "random_number",
+                            "min": -0.12,
+                            "max": 0.12
+                          },
+                          "z": {
+                            "type": "random_number",
+                            "min": -0.12,
+                            "max": 0.12
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "type": "wait",
+                      "seconds": 0.22
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "sequence",
+              "actions": [
+                {
+                  "type": "repeat",
+                  "count": 8,
+                  "actions": [
+                    {
+                      "type": "spawn_actor",
+                      "prefab": "bullet_model",
+                      "tags": [
+                        "phase_temp",
+                        "attack_3d",
+                        "cross_y_back"
+                      ],
+                      "transform": {
+                        "space": "battle.canonical",
+                        "position": {
+                          "type": "vector3",
+                          "x": {
+                            "type": "random_number",
+                            "min": -0.85,
+                            "max": 0.85
+                          },
+                          "y": -1,
+                          "z": {
+                            "type": "random_number",
+                            "min": -0.7,
+                            "max": 0.7
+                          }
+                        }
+                      },
+                      "velocity": {
+                        "space": "battle.canonical",
+                        "value": {
+                          "type": "vector3",
+                          "x": {
+                            "type": "random_number",
+                            "min": -0.12,
+                            "max": 0.12
+                          },
+                          "y": {
+                            "type": "random_number",
+                            "min": 1.05,
+                            "max": 1.35
+                          },
+                          "z": {
+                            "type": "random_number",
+                            "min": -0.12,
+                            "max": 0.12
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "type": "wait",
+                      "seconds": 0.22
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "wait",
+          "seconds": 3
+        }
+      ]
+    },
+    "attack_3d_bounce": {
+      "actions": [
+        {
+          "type": "repeat",
+          "count": 8,
+          "actions": [
+            {
+              "type": "spawn_actor",
+              "prefab": "bullet_model_bounce",
+              "tags": [
+                "phase_temp",
+                "attack_3d",
+                "bounce"
+              ],
+              "transform": {
+                "space": "battle.canonical",
+                "position": {
+                  "type": "vector3",
+                  "x": {
+                    "type": "random_number",
+                    "min": -0.65,
+                    "max": 0.65
+                  },
+                  "y": {
+                    "type": "random_number",
+                    "min": -0.65,
+                    "max": 0.65
+                  },
+                  "z": {
+                    "type": "random_number",
+                    "min": -0.55,
+                    "max": 0.55
+                  }
+                }
+              },
+              "velocity": {
+                "space": "battle.canonical",
+                "value": {
+                  "type": "vector3",
+                  "x": {
+                    "type": "random_number",
+                    "min": -1.15,
+                    "max": 1.15
+                  },
+                  "y": {
+                    "type": "random_number",
+                    "min": -1.15,
+                    "max": 1.15
+                  },
+                  "z": {
+                    "type": "random_number",
+                    "min": -1,
+                    "max": 1
+                  }
+                }
+              }
+            },
+            {
+              "type": "wait",
+              "seconds": 0.3
+            }
+          ]
+        },
+        {
+          "type": "wait",
+          "seconds": 3.2
+        }
+      ]
+    }
+  },
+  "outcomes": {
+    "victory": {
+      "result": "victory",
+      "id": "minetale:outcome/turn_cycle_test_victory"
+    }
+  },
+  "phaseGraph": {
+    "entry": "opening",
+    "phases": {
+      "opening": {
+        "rulesets": [
+          "player_locked"
+        ],
+        "onEnter": [
+          {"type": "play_sound", "sound": "minetale:battle.start", "source": "master"},
+          {"type": "play_sound", "sound": "minetale:music.battle_default", "source": "music"},
+          {
+            "type": "set_actor_property",
+            "target": "player",
+            "property": "lifecycle",
+            "value": "inactive"
+          },
+          {
+            "type": "set_actor_property",
+            "target": "player",
+            "property": "bounds_center_position",
+            "value": [
+              -3.9,
+              1.2,
+              2.375
+            ]
+          },
+          {
+            "type": "request_render_action",
+            "action": {
+              "type": "environment_background_opacity",
+              "durationSeconds": 0,
+              "opacity": 0
+            }
+          },
+          {
+            "type": "request_render_action",
+            "action": {
+              "type": "foreground_overlay",
+              "source": "environment",
+              "durationSeconds": 0,
+              "opacity": 0
+            }
+          },
+          {
+            "type": "spawn_actor",
+            "prefab": "opening_frame_suppressor",
+            "actorId": "opening_frame_suppressor"
+          },
+          {
+            "type": "spawn_actor",
+            "prefab": "opening_soul",
+            "actorId": "opening_soul"
+          },
+          {
+            "type": "wait",
+            "seconds": 1
+          },
+          {
+            "type": "parallel",
+            "actions": [
+              {
+                "type": "sequence",
+                "actions": [
+                  {
+                    "type": "request_render_action",
+                    "action": {
+                      "type": "environment_background_opacity",
+                      "durationSeconds": 0.75,
+                      "opacity": 1
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "sequence",
+                "actions": [
+                  {
+                    "type": "set_actor_property",
+                    "actorId": "opening_soul",
+                    "property": "velocity",
+                    "value": [
+                      -5.2,
+                      0,
+                      3.06
+                    ]
+                  },
+                  {
+                    "type": "wait",
+                    "seconds": 0.75
+                  },
+                  {
+                    "type": "set_actor_property",
+                    "actorId": "opening_soul",
+                    "property": "velocity",
+                    "value": [
+                      0,
+                      0,
+                      0
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "sequence",
+                "actions": [
+                  {
+                    "type": "repeat",
+                    "count": 3,
+                    "actions": [
+                      {
+                        "type": "set_actor_property",
+                        "actorId": "opening_soul",
+                        "property": "lifecycle",
+                        "value": "inactive"
+                      },
+                      {
+                        "type": "wait",
+                        "ticks": 2
+                      },
+                      {
+                        "type": "set_actor_property",
+                        "actorId": "opening_soul",
+                        "property": "lifecycle",
+                        "value": "active"
+                      },
+                      {
+                        "type": "wait",
+                        "ticks": 3
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "request_render_action",
+            "action": {
+              "type": "foreground_overlay",
+              "source": "environment",
+              "durationSeconds": 0,
+              "opacity": 1
+            }
+          },
+          {
+            "type": "destroy_actor",
+            "actorId": "opening_frame_suppressor"
+          },
+          {
+            "type": "spawn_actor",
+            "prefab": "battle_frame",
+            "actorId": "battle_frame"
+          },
+          {
+            "type": "spawn_actor",
+            "prefab": "enemy_flowey",
+            "actorId": "enemy_flowey"
+          },
+          {
+            "type": "spawn_actor",
+            "prefab": "message_text",
+            "actorId": "message_text"
+          },
+          {
+            "type": "spawn_actor",
+            "prefab": "player_name",
+            "actorId": "player_name"
+          },
+          {
+            "type": "spawn_actor",
+            "prefab": "player_lv",
+            "actorId": "player_lv"
+          },
+          {
+            "type": "spawn_actor",
+            "prefab": "player_hp_label",
+            "actorId": "player_hp_label"
+          },
+          {
+            "type": "spawn_actor",
+            "prefab": "player_hp_bar",
+            "actorId": "player_hp_bar"
+          },
+          {
+            "type": "spawn_actor",
+            "prefab": "player_hp_text",
+            "actorId": "player_hp_text"
+          },
+          {
+            "type": "spawn_actor",
+            "prefab": "option_fight",
+            "actorId": "option_fight"
+          },
+          {
+            "type": "spawn_actor",
+            "prefab": "option_act",
+            "actorId": "option_act"
+          },
+          {
+            "type": "spawn_actor",
+            "prefab": "option_item",
+            "actorId": "option_item"
+          },
+          {
+            "type": "spawn_actor",
+            "prefab": "option_mercy",
+            "actorId": "option_mercy"
+          },
+          {
+            "type": "set_actor_property",
+            "target": "player",
+            "property": "lifecycle",
+            "value": "active"
+          },
+          {
+            "type": "destroy_actor",
+            "actorId": "opening_soul"
+          },
+          {
+            "type": "wait",
+            "ticks": 1
+          },
+          {
+            "type": "request_render_action",
+            "action": {
+              "type": "foreground_overlay",
+              "source": "environment",
+              "durationSeconds": 0.75,
+              "opacity": 0
+            }
+          },
+          {
+            "type": "end_phase",
+            "to": "player_turn_fight"
+          }
+        ]
+      },
+      "player_turn_fight": {
+        "rulesets": [
+          "player_locked"
+        ],
+        "onEnter": [
+          {
+            "type": "set_var",
+            "var": "menu_active",
+            "value": true
+          },
+          {
+            "type": "set_var",
+            "var": "next_enemy_phase",
+            "value": 0
+          },
+          {
+            "type": "cleanup_tag",
+            "tag": "phase_temp"
+          },
+          {
+            "type": "call_pattern",
+            "id": "frame_dialogue"
+          },
+          {
+            "type": "set_var",
+            "var": "menu_selection",
+            "value": 0
+          },
+          {
+            "type": "set_var",
+            "var": "menu_level",
+            "value": 0
+          },
+          {
+            "type": "set_var",
+            "var": "submenu_selection",
+            "value": 0
+          },
+          {
+            "type": "call_pattern",
+            "id": "menu_refresh_root"
+          },
+          {
+            "type": "set_view_mode",
+            "sceneMode": "2d",
+            "viewScale": 1,
+            "durationSeconds": 0.65,
+            "viewMode": {
+              "type": "ortho_2d"
+            }
+          },
+          {
+            "type": "type_actor_text",
+            "actorId": "message_text",
+            "text": "* 小花正在等待你的选择。",
+            "secondsPerCharacter": 0.035
+          },
+          {
+            "type": "modify_var",
+            "var": "turn_count",
+            "op": "add",
+            "amount": 1
+          }
+        ],
+        "onTick": [
+          {
+            "type": "call_pattern",
+            "id": "sync_hp_bar"
+          }
+        ]
+      },
+      "enemy_turn_2d": {
+        "rulesets": [
+          "enemy_red_soul"
+        ],
+        "onEnter": [
+          {
+            "type": "set_var",
+            "var": "menu_active",
+            "value": false
+          },
+          {
+            "type": "cleanup_tag",
+            "tag": "phase_temp"
+          },
+          {
+            "type": "call_pattern",
+            "id": "ui_enemy"
+          },
+          {
+            "type": "call_pattern",
+            "id": "frame_arena_2d"
+          },
+          {
+            "type": "set_actor_text",
+            "actorId": "message_text",
+            "text": ""
+          },
+          {
+            "type": "set_view_mode",
+            "sceneMode": "2d",
+            "viewScale": 1,
+            "durationSeconds": 0.55,
+            "viewMode": {
+              "type": "ortho_2d"
+            }
+          },
+          {
+            "type": "random_one",
+            "options": [
+              [
+                {
+                  "type": "call_pattern",
+                  "id": "attack_2d_rain"
+                }
+              ],
+              [
+                {
+                  "type": "call_pattern",
+                  "id": "attack_2d_crossfire"
+                }
+              ],
+              [
+                {
+                  "type": "call_pattern",
+                  "id": "attack_2d_bounce"
+                }
+              ]
+            ]
+          },
+          {
+            "type": "cleanup_tag",
+            "tag": "phase_temp"
+          },
+          {
+            "type": "end_phase",
+            "to": "player_turn_act"
+          }
+        ],
+        "onTick": [
+          {
+            "type": "call_pattern",
+            "id": "sync_hp_bar"
+          }
+        ]
+      },
+      "player_turn_act": {
+        "rulesets": [
+          "player_locked"
+        ],
+        "onEnter": [
+          {
+            "type": "set_var",
+            "var": "menu_active",
+            "value": true
+          },
+          {
+            "type": "set_var",
+            "var": "next_enemy_phase",
+            "value": 1
+          },
+          {
+            "type": "cleanup_tag",
+            "tag": "phase_temp"
+          },
+          {
+            "type": "call_pattern",
+            "id": "frame_dialogue"
+          },
+          {
+            "type": "set_var",
+            "var": "menu_selection",
+            "value": 0
+          },
+          {
+            "type": "set_var",
+            "var": "menu_level",
+            "value": 0
+          },
+          {
+            "type": "set_var",
+            "var": "submenu_selection",
+            "value": 0
+          },
+          {
+            "type": "call_pattern",
+            "id": "menu_refresh_root"
+          },
+          {
+            "type": "set_view_mode",
+            "sceneMode": "2d",
+            "viewScale": 1,
+            "durationSeconds": 0.65,
+            "viewMode": {
+              "type": "ortho_2d"
+            }
+          },
+          {
+            "type": "type_actor_text",
+            "actorId": "message_text",
+            "text": "* 小花正在等待你的选择。",
+            "secondsPerCharacter": 0.035
+          },
+          {
+            "type": "modify_var",
+            "var": "turn_count",
+            "op": "add",
+            "amount": 1
+          }
+        ],
+        "onTick": [
+          {
+            "type": "call_pattern",
+            "id": "sync_hp_bar"
+          }
+        ]
+      },
+      "enemy_turn_3d": {
+        "rulesets": [
+          "enemy_red_soul"
+        ],
+        "onEnter": [
+          {
+            "type": "set_var",
+            "var": "menu_active",
+            "value": false
+          },
+          {
+            "type": "cleanup_tag",
+            "tag": "phase_temp"
+          },
+          {
+            "type": "call_pattern",
+            "id": "ui_enemy"
+          },
+          {
+            "type": "call_pattern",
+            "id": "frame_arena_3d"
+          },
+          {
+            "type": "set_actor_text",
+            "actorId": "message_text",
+            "text": ""
+          },
+          {
+            "type": "set_view_mode",
+            "sceneMode": "3d",
+            "viewScale": 0.82,
+            "durationSeconds": 0.8,
+            "viewMode": {
+              "type": "perspective_3d",
+              "camera": {
+                "position": [
+                  3.7,
+                  5.3,
+                  -2.5
+                ],
+                "target": [
+                  0,
+                  0,
+                  0
+                ],
+                "fovDegrees": 48
+              }
+            }
+          },
+          {
+            "type": "random_one",
+            "options": [
+              [
+                {
+                  "type": "call_pattern",
+                  "id": "attack_3d_tunnel"
+                }
+              ],
+              [
+                {
+                  "type": "call_pattern",
+                  "id": "attack_3d_cross"
+                }
+              ],
+              [
+                {
+                  "type": "call_pattern",
+                  "id": "attack_3d_bounce"
+                }
+              ]
+            ]
+          },
+          {
+            "type": "cleanup_tag",
+            "tag": "phase_temp"
+          },
+          {
+            "type": "end_phase",
+            "to": "player_turn_fight"
+          }
+        ],
+        "onTick": [
+          {
+            "type": "call_pattern",
+            "id": "sync_hp_bar"
+          }
+        ]
+      }
+    }
+  },
+  "budgets": {
+    "maxActorSpawnsPerTick": 128,
+    "maxSignalDispatchPerTick": 512,
+    "maxLoopIterations": 1024,
+    "maxRecursionDepth": 64,
+    "maxRuleStackDepth": 64,
+    "maxActionsPerStackPerTick": 512,
+    "maxActionsPerBattleTick": 2048,
+    "maxRenderRequestsPerTick": 64
+  },
+  "editorHints": {
+    "purpose": "turn_cycle_prototype_and_capability_probe",
+    "referenceLayout": "Undertale-style encounter HUD"
+  }
+}
